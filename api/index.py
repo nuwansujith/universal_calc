@@ -370,14 +370,6 @@ def discriminant_calculator():
                          title='Discriminant Calculator - Quadratic Equations',
                          description='Calculate the discriminant of quadratic equations to determine the nature of roots with our free tool.')
 
-@app.route('/sitemap.xml')
-def sitemap():
-    xml = """<?xml version="1.0" encoding="UTF-8"?>
-    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-      <url><loc>https://www.omnicalc.xyz/</loc></url>
-    </urlset>"""
-    return Response(xml, mimetype='text/xml')
-
 @app.route('/privacy-policy')
 def privacy_policy():
     return render_template('privacy.html')
