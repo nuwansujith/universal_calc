@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="UniversalCalc - 100+ specialized calculators for construction, finance, health, education & more. Accurate, free tools for professionals & students.">
+    <meta name="keywords" content="calculators, construction calculator, finance calculator, health calculator, education calculator, math tools, engineering calculator, mortgage calculator, BMI calculator, GPA calculator">
+    <meta name="author" content="UniversalCalc">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="UniversalCalc">
+    <meta name="application-name" content="UniversalCalc">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="msapplication-TileColor" content="#3b82f6">
+    <meta property="og:title" content="UniversalCalc - Comprehensive Calculator Collection">
+    <meta property="og:description" content="Your one-stop solution for all types of calculators - construction, finance, health, education, and more.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.universalcalc.com">
+    <meta property="og:image" content="https://www.universalcalc.com/images/og-image.jpg">
+    <meta property="og:site_name" content="UniversalCalc">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="UniversalCalc - Comprehensive Calculator Collection">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="UniversalCalc - Comprehensive Calculator Collection">
+    <meta name="twitter:description" content="100+ specialized calculators for construction, finance, health, education & more.">
+    <meta name="twitter:image" content="https://www.universalcalc.com/images/universalcalc-social.jpg">
+    <link rel="canonical" href="https://www.universalcalc.com">
+    
+    <title>{% block title %}UniversalCalc - Comprehensive Calculator Collection{% endblock %}</title>
+    
+    <!-- Structured data for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "UniversalCalc",
+      "url": "https://www.universalcalc.com",
+      "description": "Comprehensive collection of specialized calculators for construction, finance, health, education, and more.",
+      "applicationCategory": "CalculatorApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "UniversalCalc",
+  "url": "https://www.universalcalc.com",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://www.universalcalc.com/search?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#10b981',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+        }
+        /* Improved focus styles for accessibility */
+        a:focus, button:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold">UniversalCalc</h1>
+                <p class="sr-only">Comprehensive calculator collection for all your needs</p>
+
+                <nav aria-label="Main navigation">
+                    <ul class="flex space-x-6">
+
+                        <!-- Construction Calculators Dropdown -->
+                        <li class="relative group" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
+                            <button class="text-gray-200 hover:text-white relative group" :class="{ 'text-white': open }" aria-expanded="false" :aria-expanded="open">
+                                <span class="relative">
+                                    Construction
+                                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                                </span>
+                                <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div x-show="open" x-transition class="absolute left-0 mt-2 w-56 origin-top-left bg-white rounded-md shadow-lg z-10" @click.away="open = false">
+                                <div class="py-1">
+                                    <!-- Existing construction calculator links -->
+                                    <a href="/" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/' %}bg-gray-100 font-medium{% endif %}">
+                                        Cubic Yard Calculator
+                                    </a>
+                                    <a href="/board-foot" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/board-foot' %}bg-gray-100 font-medium{% endif %}">
+                                        Board Foot Calculator
+                                    </a>
+                                    <a href="/stone" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/stone' %}bg-gray-100 font-medium{% endif %}">
+                                        Stone Calculator
+                                    </a>
+                                    <a href="/gravel" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/gravel' %}bg-gray-100 font-medium{% endif %}">
+                                        Gravel Calculator
+                                    </a>
+                                    <a href="/sand" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/sand' %}bg-gray-100 font-medium{% endif %}">
+                                        Sand Calculator
+                                    </a>
+                                    <a href="/tank-volume" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/tank-volume' %}bg-gray-100 font-medium{% endif %}">
+                                        Tank Volume Calculator
+                                    </a>
+                                    <a href="/concrete" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/concrete' %}bg-gray-100 font-medium{% endif %}">
+                                        Concrete Calculator
+                                    </a>
+                                    <a href="/drywall-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/drywall-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                        Drywall Calculator
+                                    </a>
+                                    <a href="/rebar-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/rebar-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                        Rebar Calculator
+                                    </a>
+                                    <a href="/roofing-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/roofing-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                        Roofing Calculator
+                                    </a>
+                                    <a href="/paver-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/paver-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                        Pavers Calculator
+                                    </a>
+                                    <a href="/framing-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/framing-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                        Framing Calculator
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+
+
+                        <li class="relative group" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
+                            <button class="text-gray-200 hover:text-white relative group" :class="{ 'text-white': open }" aria-expanded="false" :aria-expanded="open">
+                                <span class="relative">
+                                    Math & Science
+                                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                                </span>
+                                <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div x-show="open" x-transition class="absolute left-0 mt-2 w-56 origin-top-left bg-white rounded-md shadow-lg z-10" @click.away="open = false">
+                                <div class="py-1">
+                                    <a href="/eigenvalue-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/eigenvalue-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                        Eigenvalue Calculator
+                                    </a>
+                                    <a href="/rref-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/rref-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    RREF Calculator (Matrix)
+                                    </a>
+                                    <a href="/matrix-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/matrix-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Matrix Calculator
+                                    </a>
+                                    <a href="/gaussian-elimination" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/gaussian-elimination' %}bg-gray-100 font-medium{% endif %}">
+                                    Gaussian Elimination Calculator
+                                    </a>
+                                    <a href="/fourier-transform" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/fourier-transform' %}bg-gray-100 font-medium{% endif %}">
+                                    Fourier Transform Calculator
+                                    </a>
+                                    <a href="/quadratic-regression" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/quadratic-regression' %}bg-gray-100 font-medium{% endif %}">
+                                    Quadratic Regression Calculator
+                                    </a>
+                                    <a href="/discriminant-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/discriminant-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Discriminant Calculator
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+
+
+                        <li class="relative group" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
+                            <button class="text-gray-200 hover:text-white relative group" :class="{ 'text-white': open }" aria-expanded="false" :aria-expanded="open">
+                                <span class="relative">
+                                    Automotive & Engineering
+                                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                                </span>
+                                <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div x-show="open" x-transition class="absolute left-0 mt-2 w-56 origin-top-left bg-white rounded-md shadow-lg z-10" @click.away="open = false">
+                                <div class="py-1">
+                                    <a href="/0-60-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/0-60-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    0-60 MPH Calculator
+                                    </a>
+                                    <a href="/quarter-mile-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/quarter-mile-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    1/4 Mile Calculator
+                                    </a>
+                                     <a href="/engine-displacement-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/engine-displacement-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Engine Displacement Calculator
+                                    </a>
+                                    <a href="/towing-estimate-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/towing-estimate-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Towing Estimate Calculator
+                                    </a>
+                                    <a href="/power-to-weight-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/power-to-weight-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Power-to-Weight Ratio Calculator
+                                    </a>
+                                    <a href="/gear-ratio-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/gear-ratio-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Gear Ratio Calculator
+                                    </a>
+                                    <a href="/beam-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/beam-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Beam Calculator
+                                    </a>
+                                    <a href="/moment-of-inertia-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/moment-of-inertia-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Moment of Inertia Calculator
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+
+
+                        <li class="relative group" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
+                            <button class="text-gray-200 hover:text-white relative group" :class="{ 'text-white': open }" aria-expanded="false" :aria-expanded="open">
+                                <span class="relative">
+                                    Mortgage & Loan
+                                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                                </span>
+                                <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div x-show="open" x-transition class="absolute left-0 mt-2 w-56 origin-top-left bg-white rounded-md shadow-lg z-10" @click.away="open = false">
+                                <div class="py-1">
+                                    <a href="/heloc-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/heloc-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                        HELOC Calculator
+                                    </a>
+                                    <a href="/mortgage-recast-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/mortgage-recast-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Mortgage Recast Calculator
+                                    </a>
+                                    <a href="/construction-loan-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/construction-loan-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Construction Loan Calculator
+                                    </a>
+                                    <a href="/dscr-loan-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/dscr-loan-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    DSCR Loan Calculator
+                                    </a>
+                                    <a href="/biweekly-mortgage-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/biweekly-mortgage-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Biweekly Mortgage Calculator
+                                    </a>
+                                    <a href="/usda-mortgage-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/usda-mortgage-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    USDA Mortgage Calculator
+                                    </a>
+                                    <a href="/early-payoff-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/early-payoff-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Early Payoff Calculator
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+
+
+                        <li class="relative group" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
+                            <button class="text-gray-200 hover:text-white relative group" :class="{ 'text-white': open }" aria-expanded="false" :aria-expanded="open">
+                                <span class="relative">
+                                    Financial & Paycheck
+                                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                                </span>
+                                <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div x-show="open" x-transition class="absolute left-0 mt-2 w-56 origin-top-left bg-white rounded-md shadow-lg z-10" @click.away="open = false">
+                                <div class="py-1">
+                                    <a href="/ohio-paycheck-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/ohio-paycheck-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                        Ohio Paycheck Calculator
+                                    </a>
+                                    <a href="/michigan-paycheck-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/michigan-paycheck-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Michigan Paycheck Calculator
+                                    </a>
+                                    <a href="/nj-paycheck-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/nj-paycheck-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    New Jersey Paycheck Calculator
+                                    </a>
+                                    <a href="/virginia-paycheck-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/virginia-paycheck-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Virginia Paycheck Calculator
+                                    </a>
+                                    <a href="/colorado-paycheck-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/colorado-paycheck-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Colorado Paycheck Calculator
+                                    </a>
+                                    <a href="/texas-paycheck-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/texas-paycheck-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Texas Paycheck Calculator
+                                    </a>
+                                    <a href="/hsa-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/hsa-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    HSA Calculator
+                                    </a>
+                                    <a href="/bonus-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/bonus-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Bonus Tax Calculator
+                                    </a>
+                                    <a href="/child-support-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/child-support-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Child Support Calculator
+                                    </a>
+                                    <a href="/reverse-tax-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/reverse-tax-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Reverse Tax Calculator
+                                    </a>
+                                    <a href="/cash-on-cash-return" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/cash-on-cash-return' %}bg-gray-100 font-medium{% endif %}">
+                                    Cash on Cash Return Calculator
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="relative group" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
+                            <button class="text-gray-200 hover:text-white relative group" :class="{ 'text-white': open }" aria-expanded="false" :aria-expanded="open">
+                                <span class="relative">
+                                    Health & Fitness
+                                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                                </span>
+                                <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div x-show="open" x-transition class="absolute left-0 mt-2 w-56 origin-top-left bg-white rounded-md shadow-lg z-10" @click.away="open = false">
+                                <div class="py-1">
+                                    <a href="/waist-hip-ratio" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/waist-hip-ratio' %}bg-gray-100 font-medium{% endif %}">
+                                        Waist-to-Hip Ratio Calculator
+                                    </a>
+                                    <a href="/fasting-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/fasting-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Fasting Calculator
+                                    </a>
+                                    <a href="/anc-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/anc-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    ANC Calculator (Neutrophils)
+                                    </a>
+                                    <a href="/homa-ir-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/homa-ir-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    HOMA-IR Calculator (Insulin Resistance)
+                                    </a>
+                                    <a href="/steroid-conversion-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/steroid-conversion-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Steroid Conversion Calculator
+                                    </a>
+                                    <a href="/bmi-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/bmi-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    BMI Calculator
+                                    </a>
+                                    <a href="/pregnancy-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/pregnancy-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Pregnancy Calculator
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="relative group" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
+                            <button class="text-gray-200 hover:text-white relative group" :class="{ 'text-white': open }" aria-expanded="false" :aria-expanded="open">
+                                <span class="relative">
+                                    Education & Academic
+                                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                                </span>
+                                <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div x-show="open" x-transition class="absolute left-0 mt-2 w-56 origin-top-left bg-white rounded-md shadow-lg z-10" @click.away="open = false">
+                                <div class="py-1">
+                                    <a href="/gpa-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/gpa-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                        Cumulative GPA Calculator
+                                    </a>
+                                    <a href="/apush-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/apush-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    APUSH Score Calculator
+                                    </a>
+                                    <a href="/ap-lang-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/ap-lang-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                     AP Lang Score Calculator
+                                    </a>
+                                    <a href="/lsat-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/lsat-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    LSAT Score Calculator
+                                    </a>
+                                    <a href="/digital-sat-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/digital-sat-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    Digital SAT Score Calculator
+                                    </a>
+                                    <a href="/lsac-gpa-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/lsac-gpa-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    LSAC GPA Calculator
+                                    </a>
+                                    <a href="/ib-grade-calculator" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if request.path == '/ib-grade-calculator' %}bg-gray-100 font-medium{% endif %}">
+                                    IB Grade Calculator
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li>
+    <a href="/" class="text-gray-200 hover:text-white relative group {% if request.path == '/' %}text-white{% endif %}">
+        <span class="relative">
+            Home
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+        </span>
+    </a>
+</li>
+
+
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-dark text-white py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">UniversalCalc</h3>
+                    <p class="text-gray-300">Your comprehensive calculator solution for all needs - construction, finance, health, education, and more.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="/" class="text-gray-300 hover:text-white">Home</a></li>
+                        <li><a href="/sitemap" class="text-gray-300 hover:text-white">Sitemap</a></li>
+                        <li><a href="/privacy-policy" class="text-gray-300 hover:text-white">Privacy Policy</a></li>
+                        <li><a href="/terms-of-service" class="text-gray-300 hover:text-white">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div>
+                <h3 class="text-lg font-semibold mb-4">Calculator Categories</h3>
+                <ul class="space-y-2">
+                    <li><a href="/construction-calculators" class="text-gray-300 hover:text-white">Construction Calculators</a></li>
+                    <li><a href="/financial-calculators" class="text-gray-300 hover:text-white">Financial Calculators</a></li>
+                    <li><a href="/health-calculators" class="text-gray-300 hover:text-white">Health Calculators</a></li>
+                    <li><a href="/education-calculators" class="text-gray-300 hover:text-white">Education Calculators</a></li>
+                </ul>
+            </div>
+        </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Popular Calculators</h3>
+                    <ul class="space-y-2">
+                        <li><a href="/concrete" class="text-gray-300 hover:text-white">Concrete Calculator</a></li>
+                        <li><a href="/mortgage-recast-calculator" class="text-gray-300 hover:text-white">Mortgage Calculator</a></li>
+                        <li><a href="/bmi-calculator" class="text-gray-300 hover:text-white">BMI Calculator</a></li>
+                        <li><a href="/gpa-calculator" class="text-gray-300 hover:text-white">GPA Calculator</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Connect</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                </div>
+            </div>
+<div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
+            <p>© 2023 UniversalCalc. All rights reserved. | <a href="/sitemap.xml" class="hover:text-white">XML Sitemap</a></p>
+            </div>
+        </div>
+    </footer>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

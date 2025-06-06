@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+
+{% block title %}Ohio Paycheck Calculator 2024 - Accurate Take-Home Pay Estimate{% endblock %}
+
+{% block meta_description %}Free Ohio paycheck calculator for 2024. Estimate your net pay after federal & state taxes, Social Security, and Medicare deductions based on your gross income and withholding allowances.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Ohio Paycheck Calculator</h1>
+        
+        <div x-data="paycheckCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="grossPay" class="block text-sm font-medium text-gray-700 mb-1">Gross Pay ($)</label>
+                    <input x-model="grossPay" type="number" step="0.01" id="grossPay" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 2500.00">
+                </div>
+                <div>
+                    <label for="payFrequency" class="block text-sm font-medium text-gray-700 mb-1">Pay Frequency</label>
+                    <select x-model="payFrequency" id="payFrequency" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="weekly">Weekly</option>
+                        <option value="biweekly">Bi-Weekly</option>
+                        <option value="semimonthly">Semi-Monthly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="annually">Annually</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="federalAllowances" class="block text-sm font-medium text-gray-700 mb-1">Federal Allowances</label>
+                    <input x-model="federalAllowances" type="number" id="federalAllowances" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 1" min="0">
+                </div>
+                <div>
+                    <label for="additionalFederalWithholding" class="block text-sm font-medium text-gray-700 mb-1">Additional Federal Withholding ($)</label>
+                    <input x-model="additionalFederalWithholding" type="number" step="0.01" id="additionalFederalWithholding" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 0.00" min="0">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="ohioAllowances" class="block text-sm font-medium text-gray-700 mb-1">Ohio Allowances</label>
+                    <input x-model="ohioAllowances" type="number" id="ohioAllowances" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 1" min="0">
+                </div>
+                <div>
+                    <label for="additionalOhioWithholding" class="block text-sm font-medium text-gray-700 mb-1">Additional Ohio Withholding ($)</label>
+                    <input x-model="additionalOhioWithholding" type="number" step="0.01" id="additionalOhioWithholding" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 0.00" min="0">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Marital Status</label>
+                    <div class="flex space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" x-model="maritalStatus" value="single" class="h-4 w-4 text-primary focus:ring-primary">
+                            <span class="ml-2 text-gray-700">Single</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" x-model="maritalStatus" value="married" class="h-4 w-4 text-primary focus:ring-primary">
+                            <span class="ml-2 text-gray-700">Married</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate Paycheck
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Paycheck Summary</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Gross Pay: <span class="font-bold">$<span x-text="result.grossPay.toFixed(2)"></span></span></p>
+                            <p>Federal Tax: <span class="font-bold">$<span x-text="result.federalTax.toFixed(2)"></span></span></p>
+                            <p>Social Security Tax: <span class="font-bold">$<span x-text="result.socialSecurityTax.toFixed(2)"></span></span></p>
+                            <p>Medicare Tax: <span class="font-bold">$<span x-text="result.medicareTax.toFixed(2)"></span></span></p>
+                            <p>Ohio State Tax: <span class="font-bold">$<span x-text="result.ohioTax.toFixed(2)"></span></span></p>
+                            <p class="pt-2 border-t border-green-200">Net Pay: <span class="font-bold text-lg">$<span x-text="result.netPay.toFixed(2)"></span></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-800">Error</h3>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">Ohio Paycheck Calculator: Estimate Your Take-Home Pay</h2>
+            <p class="text-gray-600 mb-4">Our free Ohio paycheck calculator helps you estimate your net pay after federal and state tax withholdings, Social Security, and Medicare deductions. Whether you're in Columbus, Cleveland, Cincinnati, or anywhere in the Buckeye State, this tool provides accurate paycheck calculations based on your gross income, pay frequency, and tax allowances.</p>
+            
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">2024 Ohio Tax Information:</h3>
+                <ul class="text-sm text-gray-600 ml-4 list-disc">
+                    <li><strong>Ohio Income Tax Rates:</strong> Progressive rates from 0% to 3.99%</li>
+                    <li><strong>Personal Exemptions:</strong> $2,400 per allowance claimed</li>
+                    <li><strong>Municipal Taxes:</strong> Some Ohio cities have local income taxes (not included in this calculator)</li>
+                    <li><strong>Tax Brackets:</strong> Adjusted annually for inflation</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Federal Tax Information (2024):</h3>
+                <ul class="text-sm text-gray-600 ml-4 list-disc">
+                    <li><strong>Federal Income Tax:</strong> Progressive rates from 10% to 37%</li>
+                    <li><strong>Standard Deduction:</strong> $14,600 (Single) or $29,200 (Married)</li>
+                    <li><strong>Social Security Tax:</strong> 6.2% on income up to $168,600</li>
+                    <li><strong>Medicare Tax:</strong> 1.45% on all income (plus 0.9% for high earners)</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">How to Use This Ohio Paycheck Calculator:</h3>
+                <ol class="text-sm text-gray-600 ml-4 list-decimal">
+                    <li>Enter your gross pay amount (before any deductions)</li>
+                    <li>Select your pay frequency (weekly, bi-weekly, etc.)</li>
+                    <li>Enter your federal and Ohio tax allowances</li>
+                    <li>Specify any additional withholding amounts if applicable</li>
+                    <li>Select your marital status</li>
+                    <li>Click "Calculate Paycheck" to see your estimated net pay</li>
+                </ol>
+                <p class="text-sm text-gray-600 mt-2">Note: This calculator provides estimates only. For exact figures, consult your payroll department or tax professional.</p>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Common Questions About Ohio Paychecks:</h3>
+                <div class="space-y-3">
+                    <div>
+                        <h4 class="font-medium text-gray-700">Why is my Ohio paycheck different from my gross pay?</h4>
+                        <p class="text-sm text-gray-600">Ohio paychecks are subject to federal income tax, Social Security tax (6.2%), Medicare tax (1.45%), and Ohio state income tax (0%-3.99%). Additional deductions may include retirement contributions, health insurance, or other benefits.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-700">How often are pay periods in Ohio?</h4>
+                        <p class="text-sm text-gray-600">Common pay frequencies in Ohio include:
+                            <ul class="ml-4 list-disc">
+                                <li><strong>Weekly:</strong> 52 pay periods per year</li>
+                                <li><strong>Bi-Weekly:</strong> 26 pay periods per year</li>
+                                <li><strong>Semi-Monthly:</strong> 24 pay periods per year</li>
+                                <li><strong>Monthly:</strong> 12 pay periods per year</li>
+                            </ul>
+                        </p>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-700">Are there local taxes in Ohio?</h4>
+                        <p class="text-sm text-gray-600">Many Ohio cities and school districts impose local income taxes. For example, Columbus has a 2.5% local tax, while Cleveland's is 2%. These municipal taxes are not included in this calculator.</p>
+                    </div>
+                </div>
+            </section>
+        </article>
+    </div>
+</div>
+
+<script>
+    function paycheckCalculator() {
+        return {
+            grossPay: null,
+            payFrequency: 'biweekly',
+            federalAllowances: 1,
+            additionalFederalWithholding: 0,
+            ohioAllowances: 1,
+            additionalOhioWithholding: 0,
+            maritalStatus: 'single',
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                if (!this.grossPay || this.grossPay <= 0) {
+                    this.error = 'Please enter a valid gross pay amount';
+                    return;
+                }
+                
+                // Calculate annual income based on pay frequency
+                let annualIncome;
+                switch(this.payFrequency) {
+                    case 'weekly':
+                        annualIncome = this.grossPay * 52;
+                        break;
+                    case 'biweekly':
+                        annualIncome = this.grossPay * 26;
+                        break;
+                    case 'semimonthly':
+                        annualIncome = this.grossPay * 24;
+                        break;
+                    case 'monthly':
+                        annualIncome = this.grossPay * 12;
+                        break;
+                    case 'annually':
+                        annualIncome = this.grossPay;
+                        break;
+                }
+                
+                // Calculate federal tax (simplified estimation)
+                const federalTax = this.calculateFederalTax(annualIncome);
+                
+                // Calculate FICA taxes
+                const socialSecurityTax = Math.min(annualIncome, 160200) * 0.062;
+                const medicareTax = annualIncome * 0.0145;
+                
+                // Calculate Ohio tax (simplified estimation)
+                const ohioTax = this.calculateOhioTax(annualIncome);
+                
+                // Convert annual taxes to per paycheck
+                let payPeriods;
+                switch(this.payFrequency) {
+                    case 'weekly':
+                        payPeriods = 52;
+                        break;
+                    case 'biweekly':
+                        payPeriods = 26;
+                        break;
+                    case 'semimonthly':
+                        payPeriods = 24;
+                        break;
+                    case 'monthly':
+                        payPeriods = 12;
+                        break;
+                    case 'annually':
+                        payPeriods = 1;
+                        break;
+                }
+                
+                const federalTaxPerPaycheck = federalTax / payPeriods;
+                const socialSecurityTaxPerPaycheck = socialSecurityTax / payPeriods;
+                const medicareTaxPerPaycheck = medicareTax / payPeriods;
+                const ohioTaxPerPaycheck = ohioTax / payPeriods;
+                
+                // Add additional withholding
+                const totalFederalTax = federalTaxPerPaycheck + parseFloat(this.additionalFederalWithholding || 0);
+                const totalOhioTax = ohioTaxPerPaycheck + parseFloat(this.additionalOhioWithholding || 0);
+                
+                // Calculate net pay
+                const totalDeductions = totalFederalTax + socialSecurityTaxPerPaycheck + medicareTaxPerPaycheck + totalOhioTax;
+                const netPay = this.grossPay - totalDeductions;
+                
+                this.result = {
+                    grossPay: parseFloat(this.grossPay),
+                    federalTax: totalFederalTax,
+                    socialSecurityTax: socialSecurityTaxPerPaycheck,
+                    medicareTax: medicareTaxPerPaycheck,
+                    ohioTax: totalOhioTax,
+                    netPay: netPay
+                };
+            },
+            
+            calculateFederalTax(annualIncome) {
+                // Simplified federal tax calculation (2023 rates)
+                const standardDeduction = this.maritalStatus === 'single' ? 13850 : 27700;
+                const taxableIncome = annualIncome - standardDeduction - (this.federalAllowances * 4300);
+                
+                if (taxableIncome <= 0) return 0;
+                
+                let tax = 0;
+                
+                if (this.maritalStatus === 'single') {
+                    if (taxableIncome > 578125) {
+                        tax = 174238.25 + (taxableIncome - 578125) * 0.37;
+                    } else if (taxableIncome > 231250) {
+                        tax = 52832 + (taxableIncome - 231250) * 0.35;
+                    } else if (taxableIncome > 95375) {
+                        tax = 16290 + (taxableIncome - 95375) * 0.32;
+                    } else if (taxableIncome > 44725) {
+                        tax = 5147 + (taxableIncome - 44725) * 0.24;
+                    } else if (taxableIncome > 11000) {
+                        tax = 1100 + (taxableIncome - 11000) * 0.22;
+                    } else {
+                        tax = taxableIncome * 0.10;
+                    }
+                } else {
+                    if (taxableIncome > 693750) {
+                        tax = 186601.50 + (taxableIncome - 693750) * 0.37;
+                    } else if (taxableIncome > 462500) {
+                        tax = 105664 + (taxableIncome - 462500) * 0.35;
+                    } else if (taxableIncome > 190750) {
+                        tax = 32580 + (taxableIncome - 190750) * 0.32;
+                    } else if (taxableIncome > 89450) {
+                        tax = 10294 + (taxableIncome - 89450) * 0.24;
+                    } else if (taxableIncome > 22000) {
+                        tax = 2200 + (taxableIncome - 22000) * 0.22;
+                    } else {
+                        tax = taxableIncome * 0.10;
+                    }
+                }
+                
+                return Math.max(0, tax);
+            },
+            
+            calculateOhioTax(annualIncome) {
+                // Simplified Ohio tax calculation (2023 rates)
+                const exemptionAmount = this.ohioAllowances * 2400;
+                let taxableIncome = annualIncome - exemptionAmount;
+                
+                if (taxableIncome <= 0) return 0;
+                
+                let tax = 0;
+                
+                if (taxableIncome > 115300) {
+                    tax = 3687.85 + (taxableIncome - 115300) * 0.0399;
+                } else if (taxableIncome > 92150) {
+                    tax = 2952.60 + (taxableIncome - 92150) * 0.0385;
+                } else if (taxableIncome > 46100) {
+                    tax = 1106.40 + (taxableIncome - 46100) * 0.0385;
+                } else if (taxableIncome > 26050) {
+                    tax = 609.00 + (taxableIncome - 26050) * 0.0248;
+                } else if (taxableIncome > 11000) {
+                    tax = 110.00 + (taxableIncome - 11000) * 0.0333;
+                } else if (taxableIncome > 5000) {
+                    tax = 0 + (taxableIncome - 5000) * 0.0222;
+                } else {
+                    tax = 0;
+                }
+                
+                return Math.max(0, tax);
+            }
+        }
+    }
+</script>
+{% endblock %}

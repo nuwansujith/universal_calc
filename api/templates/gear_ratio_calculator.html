@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Gear Ratio Calculator - Calculate Transmission & Final Drive Ratios{% endblock %}
+
+{% block meta_description %}Free online gear ratio calculator for vehicles. Compute transmission gear ratios, final drive ratios, tire size effects, and RPM at speed for optimal performance tuning.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Gear Ratio Calculator</h1>
+        
+        <div x-data="gearRatioCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="transmissionGear" class="block text-sm font-medium text-gray-700 mb-1">Transmission Gear Ratio</label>
+                    <input x-model="transmissionGear" type="number" step="0.01" id="transmissionGear" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 3.55">
+                </div>
+                <div>
+                    <label for="finalDrive" class="block text-sm font-medium text-gray-700 mb-1">Final Drive Ratio</label>
+                    <input x-model="finalDrive" type="number" step="0.01" id="finalDrive" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 4.10">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="tireDiameter" class="block text-sm font-medium text-gray-700 mb-1">Tire Diameter (inches)</label>
+                    <input x-model="tireDiameter" type="number" step="0.1" id="tireDiameter" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 28.5">
+                </div>
+                <div>
+                    <label for="rpm" class="block text-sm font-medium text-gray-700 mb-1">Engine RPM</label>
+                    <input x-model="rpm" type="number" id="rpm" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 3000">
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate Gear Ratios
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Gear Ratio Results</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Overall Gear Ratio: <span class="font-bold" x-text="result.overallRatio"></span></p>
+                            <p>Speed at RPM: <span class="font-bold" x-text="result.speed"></span> mph</p>
+                            <p>Effective Gear Ratio: <span class="font-bold" x-text="result.effectiveRatio"></span></p>
+                            <p>RPM at 60 mph: <span class="font-bold" x-text="result.rpmAt60"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-red-800">Error</h2>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">Understanding Gear Ratios for Vehicle Performance</h2>
+            <p class="text-gray-600 mb-4">Gear ratios determine how engine power is transferred to the wheels. The right combination of transmission gear and final drive ratio affects acceleration, top speed, and fuel efficiency in cars, trucks, and performance vehicles.</p>
+            
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Gear Ratio Calculation Formulas</h3>
+                <ul class="text-sm text-gray-600 space-y-2">
+                    <li><strong>Overall Ratio:</strong> Transmission Gear × Final Drive</li>
+                    <li><strong>Speed at RPM:</strong> (RPM × Tire Diameter) / (Overall Ratio × 336)</li>
+                    <li><strong>RPM at 60 mph:</strong> (Overall Ratio × 336 × 60) / Tire Diameter</li>
+                    <li><strong>Effective Ratio:</strong> Overall Ratio / (Tire Diameter / 26)</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Common Gear Ratios for Different Vehicles</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                        <h4 class="font-medium mb-1">Transmission Gears:</h4>
+                        <ul class="space-y-1">
+                            <li>• 1st gear: 2.66 - 4.00 (for maximum acceleration)</li>
+                            <li>• 2nd gear: 1.78 - 2.50</li>
+                            <li>• 3rd gear: 1.30 - 1.80</li>
+                            <li>• 4th gear: 1.00 - 1.40 (direct drive)</li>
+                            <li>• 5th/6th gear: 0.60 - 1.00 (overdrive for fuel economy)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-medium mb-1">Final Drive Ratios:</h4>
+                        <ul class="space-y-1">
+                            <li>• Economy cars: 2.73 - 3.23 (for fuel efficiency)</li>
+                            <li>• Sports cars: 3.27 - 3.73 (balance of performance and economy)</li>
+                            <li>• Trucks/SUVs: 3.55 - 4.10 (for towing capability)</li>
+                            <li>• Performance cars: 3.73 - 4.56 (maximum acceleration)</li>
+                            <li>• Race cars: 4.10 - 5.38 (extreme acceleration)</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">How Gear Ratios Affect Vehicle Performance</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                        <h4 class="font-medium mb-1">Lower Ratios (Numerically Higher):</h4>
+                        <ul class="space-y-1 list-disc ml-4">
+                            <li>Better acceleration from standstill</li>
+                            <li>Higher engine RPM at cruising speed</li>
+                            <li>Reduced fuel efficiency on highways</li>
+                            <li>Lower top speed potential</li>
+                            <li>Ideal for towing or off-road vehicles</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-medium mb-1">Higher Ratios (Numerically Lower):</h4>
+                        <ul class="space-y-1 list-disc ml-4">
+                            <li>Better highway fuel efficiency</li>
+                            <li>Lower engine RPM at cruising speed</li>
+                            <li>Reduced acceleration performance</li>
+                            <li>Higher potential top speed</li>
+                            <li>Ideal for highway commuting</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Tire Size Impact on Gear Ratios</h3>
+                <p class="text-sm text-gray-600 mb-2">Larger tires effectively create a higher (taller) gear ratio, while smaller tires create a lower (shorter) ratio. The effective ratio helps compare setups with different tire sizes when tuning your vehicle's performance.</p>
+                <ul class="text-sm text-gray-600 ml-4 list-disc">
+                    <li>+1" tire diameter ≈ +0.10 final drive ratio change</li>
+                    <li>-1" tire diameter ≈ -0.10 final drive ratio change</li>
+                    <li>Changing from 26" to 28" tires ≈ similar effect as changing from 3.73 to 3.55 final drive</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">How to Use This Gear Ratio Calculator</h3>
+                <p class="text-sm text-gray-600 mb-2">Our free online tool helps you:</p>
+                <ul class="text-sm text-gray-600 ml-4 list-disc">
+                    <li>Compare different transmission and final drive combinations</li>
+                    <li>Understand how tire size changes affect your gearing</li>
+                    <li>Calculate RPM at specific speeds for highway driving</li>
+                    <li>Determine speed at specific RPM for track use</li>
+                    <li>Plan gear swaps or transmission modifications</li>
+                </ul>
+            </section>
+        </article>
+    </div>
+</div>
+
+<script>
+    function gearRatioCalculator() {
+        return {
+            transmissionGear: null,
+            finalDrive: null,
+            tireDiameter: null,
+            rpm: null,
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                if (!this.transmissionGear || !this.finalDrive || !this.tireDiameter) {
+                    this.error = 'Please fill in all required fields';
+                    return;
+                }
+                
+                if (this.transmissionGear <= 0 || this.finalDrive <= 0 || this.tireDiameter <= 0) {
+                    this.error = 'All values must be greater than zero';
+                    return;
+                }
+                
+                // Calculate overall ratio
+                const overallRatio = (this.transmissionGear * this.finalDrive).toFixed(2);
+                
+                // Calculate speed at given RPM if provided
+                let speed = null;
+                if (this.rpm && this.rpm > 0) {
+                    speed = ((this.rpm * this.tireDiameter) / (this.transmissionGear * this.finalDrive * 336)).toFixed(1);
+                }
+                
+                // Calculate RPM at 60 mph
+                const rpmAt60 = ((this.transmissionGear * this.finalDrive * 336 * 60) / this.tireDiameter).toFixed(0);
+                
+                // Calculate effective ratio (normalized to 26" tire)
+                const effectiveRatio = (overallRatio / (this.tireDiameter / 26)).toFixed(2);
+                
+                this.result = {
+                    overallRatio: overallRatio,
+                    speed: speed || 'N/A',
+                    rpmAt60: rpmAt60,
+                    effectiveRatio: effectiveRatio
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

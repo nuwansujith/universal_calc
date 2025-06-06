@@ -1,0 +1,561 @@
+{% extends "base.html" %}
+
+{% block title %}Fourier Transform Calculator | DFT & FFT Online Tool | YourSite{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Free online Fourier Transform calculator for DFT and FFT analysis. Visualize time and frequency domains with charts. Perfect for signal processing, engineering, and math students.">
+<meta name="keywords" content="Fourier Transform calculator, DFT calculator, FFT calculator, signal processing tool, frequency analysis, engineering calculator, math tool">
+<meta property="og:title" content="Fourier Transform Calculator | DFT & FFT Online Tool">
+<meta property="og:description" content="Free online calculator for Discrete Fourier Transform (DFT) and Fast Fourier Transform (FFT) with visualization charts.">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <article class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Fourier Transform Calculator: Analyze Signals with DFT/FFT</h1>
+        
+        <div x-data="fourierTransform()" class="space-y-6">
+            <!-- Input Type Selection -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="inputType" class="block text-sm font-medium text-gray-700 mb-1">Input Type</label>
+                    <select x-model="inputType" id="inputType" @change="resetCalculator()" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" aria-label="Select input type for Fourier Transform">
+                        <option value="manual">Manual Input</option>
+                        <option value="function">Function Definition</option>
+                        <option value="sample">Sample Signals</option>
+                    </select>
+                </div>
+                <div x-show="inputType === 'sample'">
+                    <label for="sampleSignal" class="block text-sm font-medium text-gray-700 mb-1">Sample Signal</label>
+                    <select x-model="sampleSignal" id="sampleSignal" @change="loadSample()" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" aria-label="Select sample signal type">
+                        <option value="sine">Sine Wave</option>
+                        <option value="cosine">Cosine Wave</option>
+                        <option value="square">Square Wave</option>
+                        <option value="triangle">Triangle Wave</option>
+                        <option value="impulse">Impulse</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Manual Input -->
+            <div x-show="inputType === 'manual'" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Time Domain Samples</label>
+                    <textarea x-model="manualInput" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary h-24" placeholder="Enter values separated by commas or spaces" aria-label="Enter time domain samples for Fourier Transform"></textarea>
+                    <p class="text-xs text-gray-500 mt-1">Example: 1 0 -1 0 1 0 -1 0</p>
+                </div>
+            </div>
+
+            <!-- Function Definition -->
+            <div x-show="inputType === 'function'" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="functionDef" class="block text-sm font-medium text-gray-700 mb-1">Function Definition</label>
+                        <input x-model="functionDef" id="functionDef" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g., sin(2*pi*t)" aria-label="Enter mathematical function definition">
+                    </div>
+                    <div>
+                        <label for="sampleCount" class="block text-sm font-medium text-gray-700 mb-1">Sample Count</label>
+                        <input x-model.number="sampleCount" type="number" min="4" max="1024" id="sampleCount" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" value="64" aria-label="Enter number of samples">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="timeStart" class="block text-sm font-medium text-gray-700 mb-1">Time Start</label>
+                        <input x-model.number="timeStart" type="number" step="0.1" id="timeStart" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" value="0" aria-label="Enter start time">
+                    </div>
+                    <div>
+                        <label for="timeEnd" class="block text-sm font-medium text-gray-700 mb-1">Time End</label>
+                        <input x-model.number="timeEnd" type="number" step="0.1" id="timeEnd" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" value="1" aria-label="Enter end time">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Options -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="transformType" class="block text-sm font-medium text-gray-700 mb-1">Transform Type</label>
+                    <select x-model="transformType" id="transformType" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" aria-label="Select Fourier Transform type">
+                        <option value="dft">Discrete Fourier Transform (DFT)</option>
+                        <option value="fft">Fast Fourier Transform (FFT)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="outputFormat" class="block text-sm font-medium text-gray-700 mb-1">Output Format</label>
+                    <select x-model="outputFormat" id="outputFormat" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" aria-label="Select output format">
+                        <option value="complex">Complex Numbers</option>
+                        <option value="magnitude">Magnitude</option>
+                        <option value="phase">Phase</option>
+                        <option value="real">Real Part</option>
+                        <option value="imaginary">Imaginary Part</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Actions</label>
+                    <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200" aria-label="Calculate Fourier Transform">
+                        Calculate
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div x-show="results" x-transition class="space-y-6" role="region" aria-live="polite">
+                <div class="bg-green-50 border border-green-200 rounded-md p-4">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h2 class="text-lg font-medium text-green-800">Fourier Transform Results</h2>
+                            <div class="mt-1 text-green-700">
+                                <p>Number of points: <span class="font-bold" x-text="results.length"></span></p>
+                                <p>Frequency resolution: <span class="font-bold" x-text="frequencyResolution.toFixed(4)"></span> Hz</p>
+                                <p>Nyquist frequency: <span class="font-bold" x-text="(0.5/((timeEnd-timeStart)/(sampleCount-1))).toFixed(4)"></span> Hz</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-lg border border-gray-200">
+                        <h3 class="font-medium text-gray-700 mb-2">Time Domain Signal</h3>
+                        <div x-ref="timeChart" class="h-64"></div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-gray-200">
+                        <h3 class="font-medium text-gray-700 mb-2">Frequency Spectrum</h3>
+                        <div x-ref="freqChart" class="h-64"></div>
+                    </div>
+                </div>
+
+                <!-- Data Table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full border border-gray-200">
+                        <caption class="sr-only">Fourier Transform Results Table</caption>
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-700">Index</th>
+                                <th class="px-4 py-2 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-700">Frequency (Hz)</th>
+                                <th class="px-4 py-2 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-700">Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="(value, index) in results" :key="index">
+                                <tr>
+                                    <td class="px-4 py-2 border border-gray-200 text-center" x-text="index"></td>
+                                    <td class="px-4 py-2 border border-gray-200 text-center" x-text="(index * frequencyResolution).toFixed(4)"></td>
+                                    <td class="px-4 py-2 border border-gray-200 text-center" x-text="formatOutput(value)"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4" role="alert">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-red-800">Error</h2>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <section class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <h2 class="text-xl font-semibold text-dark mb-4">Understanding Fourier Transform: A Comprehensive Guide</h2>
+        <p class="text-gray-600 mb-4">
+            The Fourier Transform is a fundamental mathematical tool that decomposes a time-domain signal into its constituent frequencies. 
+            This powerful technique is widely used in signal processing, audio engineering, image analysis, and many scientific fields.
+        </p>
+        
+        <h3 class="font-medium text-gray-700 mb-2">How to Use This Fourier Transform Calculator:</h3>
+        <ol class="list-decimal list-inside space-y-2 text-gray-600">
+            <li><strong>Select input method</strong> - Enter values manually, define a mathematical function, or choose from sample signals</li>
+            <li><strong>Choose transform type</strong> - DFT for small datasets (≤1000 points) or FFT for larger datasets (power of 2)</li>
+            <li><strong>Set output format</strong> - View complex numbers, magnitude, phase, or individual components</li>
+            <li><strong>Click Calculate</strong> - See both time-domain and frequency-domain visualizations</li>
+        </ol>
+        
+        <h3 class="font-medium text-gray-700 mt-4 mb-2">Key Concepts in Fourier Analysis:</h3>
+        <ul class="list-disc list-inside space-y-1 text-gray-600">
+            <li><strong>Time Domain vs Frequency Domain:</strong> Understand signal representation in different domains</li>
+            <li><strong>Nyquist Theorem:</strong> Sampling rate must be at least twice the highest frequency</li>
+            <li><strong>Frequency Resolution:</strong> Δf = 1/T where T is the total sampling duration</li>
+            <li><strong>Aliasing:</strong> High frequencies appearing as low frequencies due to undersampling</li>
+            <li><strong>Leakage:</strong> Energy spreading across frequencies due to finite sampling</li>
+        </ul>
+        
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gray-50 p-3 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Common Fourier Transform Pairs:</h3>
+                <ul class="space-y-1 text-sm text-gray-600">
+                    <li>• <strong>Sine wave:</strong> Single frequency peak at the sine frequency</li>
+                    <li>• <strong>Square wave:</strong> Odd harmonics with amplitudes decreasing as 1/n</li>
+                    <li>• <strong>Impulse function:</strong> Flat spectrum (all frequencies equally present)</li>
+                    <li>• <strong>Constant signal:</strong> Only DC component (0 Hz) present</li>
+                    <li>• <strong>Gaussian pulse:</strong> Fourier Transform is also a Gaussian</li>
+                </ul>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Practical Applications of Fourier Transform:</h3>
+                <ul class="space-y-1 text-sm text-gray-600">
+                    <li>• <strong>Audio Processing:</strong> Equalizers, compression, noise reduction</li>
+                    <li>• <strong>Image Compression:</strong> JPEG uses Discrete Cosine Transform (DCT)</li>
+                    <li>• <strong>Medical Imaging:</strong> MRI reconstruction uses Fourier methods</li>
+                    <li>• <strong>Vibration Analysis:</strong> Identifying machinery faults</li>
+                    <li>• <strong>Wireless Communications:</strong> OFDM modulation</li>
+                    <li>• <strong>Seismology:</strong> Earthquake frequency analysis</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+            <h3 class="font-medium text-blue-800 mb-2">Technical Notes:</h3>
+            <p class="text-blue-700 text-sm">
+                This calculator implements both the Discrete Fourier Transform (DFT) and Fast Fourier Transform (FFT) algorithms. 
+                The FFT is automatically selected when the input length is a power of 2 (32, 64, 128, etc.). 
+                For educational purposes, the DFT is used for other input lengths. 
+                In practice, FFT is preferred for its O(N log N) computational efficiency compared to DFT's O(N²) complexity.
+            </p>
+        </div>
+    </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    function fourierTransform() {
+        return {
+            inputType: 'manual',
+            sampleSignal: 'sine',
+            manualInput: '1 0 -1 0 1 0 -1 0',
+            functionDef: 'sin(2*pi*3*t)',
+            sampleCount: 64,
+            timeStart: 0,
+            timeEnd: 1,
+            transformType: 'fft',
+            outputFormat: 'magnitude',
+            results: null,
+            frequencyResolution: 0,
+            error: null,
+            timeDomainData: [],
+            timeChart: null,
+            freqChart: null,
+            
+            init() {
+                // Initialize charts when component mounts
+                this.$nextTick(() => {
+                    this.initCharts();
+                });
+            },
+            
+            initCharts() {
+                // Time domain chart
+                this.timeChart = new Chart(this.$refs.timeChart, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            label: 'Time Domain',
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            fill: true
+                        }]
+                    },
+                    options: this.getChartOptions('Time (s)', 'Amplitude')
+                });
+                
+                // Frequency domain chart
+                this.freqChart = new Chart(this.$refs.freqChart, {
+                    type: 'bar',
+                    data: {
+                        datasets: [{
+                            label: 'Frequency Domain',
+                            backgroundColor: '#10b981',
+                            borderColor: '#10b981',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: this.getChartOptions('Frequency (Hz)', this.outputFormat === 'phase' ? 'Phase (rad)' : 'Magnitude')
+                });
+            },
+            
+            getChartOptions(xLabel, yLabel) {
+                return {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: xLabel
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: yLabel
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    }
+                };
+            },
+            
+            resetCalculator() {
+                this.results = null;
+                this.error = null;
+            },
+            
+            loadSample() {
+                const samples = 64;
+                this.sampleCount = samples;
+                this.timeStart = 0;
+                this.timeEnd = 1;
+                
+                switch(this.sampleSignal) {
+                    case 'sine':
+                        this.functionDef = 'sin(2*pi*3*t)';
+                        break;
+                    case 'cosine':
+                        this.functionDef = 'cos(2*pi*2*t)';
+                        break;
+                    case 'square':
+                        this.functionDef = 'Math.sign(sin(2*pi*2*t))';
+                        break;
+                    case 'triangle':
+                        this.functionDef = '2/Math.PI * Math.asin(sin(2*pi*2*t))';
+                        break;
+                    case 'impulse':
+                        this.functionDef = 't === 0.5 ? 1 : 0';
+                        break;
+                }
+                
+                this.inputType = 'function';
+            },
+            
+            calculate() {
+                this.error = null;
+                
+                try {
+                    // Get time domain data based on input type
+                    if (this.inputType === 'manual') {
+                        this.timeDomainData = this.parseManualInput();
+                    } else if (this.inputType === 'function') {
+                        this.timeDomainData = this.generateFromFunction();
+                    } else if (this.inputType === 'sample') {
+                        this.timeDomainData = this.generateSample();
+                    }
+                    
+                    if (this.timeDomainData.length < 2) {
+                        throw new Error("Input data must have at least 2 points");
+                    }
+                    
+                    // Calculate frequency resolution
+                    const duration = this.timeEnd - this.timeStart;
+                    this.frequencyResolution = 1 / duration;
+                    
+                    // Perform the transform
+                    if (this.transformType === 'fft' && this.isPowerOfTwo(this.timeDomainData.length)) {
+                        this.results = this.fft(this.timeDomainData);
+                    } else {
+                        this.results = this.dft(this.timeDomainData);
+                    }
+                    
+                    // Update charts
+                    this.updateCharts();
+                    
+                } catch (e) {
+                    this.error = e.message;
+                    console.error(e);
+                }
+            },
+            
+            parseManualInput() {
+                // Parse comma or space separated values
+                const values = this.manualInput
+                    .split(/[\s,]+/)
+                    .filter(v => v.trim() !== '')
+                    .map(v => parseFloat(v));
+                
+                if (values.some(isNaN)) {
+                    throw new Error("Invalid input - please enter numbers only");
+                }
+                
+                return values;
+            },
+            
+            generateFromFunction() {
+                const data = [];
+                const timeStep = (this.timeEnd - this.timeStart) / (this.sampleCount - 1);
+                
+                for (let i = 0; i < this.sampleCount; i++) {
+                    const t = this.timeStart + i * timeStep;
+                    try {
+                        // Evaluate the function using the Function constructor
+                        // Note: This is a security risk in production - consider a math expression parser
+                        const func = new Function('t', `return ${this.functionDef}`);
+                        data.push(func(t));
+                    } catch (e) {
+                        throw new Error(`Error evaluating function at t=${t}: ${e.message}`);
+                    }
+                }
+                
+                return data;
+            },
+            
+            generateSample() {
+                // This is a fallback if sample loading fails
+                return this.generateFromFunction();
+            },
+            
+            isPowerOfTwo(n) {
+                return n && (n & (n - 1)) === 0;
+            },
+            
+            dft(input) {
+                const N = input.length;
+                const output = new Array(N).fill(0).map(() => ({ real: 0, imag: 0 }));
+                
+                for (let k = 0; k < N; k++) {
+                    for (let n = 0; n < N; n++) {
+                        const angle = -2 * Math.PI * k * n / N;
+                        output[k].real += input[n] * Math.cos(angle);
+                        output[k].imag += input[n] * Math.sin(angle);
+                    }
+                }
+                
+                return output;
+            },
+            
+            fft(input) {
+                const N = input.length;
+                
+                // Base case
+                if (N === 1) {
+                    return [{ real: input[0], imag: 0 }];
+                }
+                
+                // Split into even and odd
+                const even = [];
+                const odd = [];
+                for (let i = 0; i < N; i++) {
+                    if (i % 2 === 0) even.push(input[i]);
+                    else odd.push(input[i]);
+                }
+                
+                // Recursively compute FFT
+                const evenTransformed = this.fft(even);
+                const oddTransformed = this.fft(odd);
+                
+                // Combine results
+                const output = new Array(N).fill(0).map(() => ({ real: 0, imag: 0 }));
+                
+                for (let k = 0; k < N / 2; k++) {
+                    const angle = -2 * Math.PI * k / N;
+                    const expTerm = {
+                        real: Math.cos(angle),
+                        imag: Math.sin(angle)
+                    };
+                    
+                    // Complex multiplication
+                    const term = {
+                        real: expTerm.real * oddTransformed[k].real - expTerm.imag * oddTransformed[k].imag,
+                        imag: expTerm.real * oddTransformed[k].imag + expTerm.imag * oddTransformed[k].real
+                    };
+                    
+                    // Butterfly operation
+                    output[k].real = evenTransformed[k].real + term.real;
+                    output[k].imag = evenTransformed[k].imag + term.imag;
+                    
+                    output[k + N/2].real = evenTransformed[k].real - term.real;
+                    output[k + N/2].imag = evenTransformed[k].imag - term.imag;
+                }
+                
+                return output;
+            },
+            
+            formatOutput(value) {
+                if (!value) return '';
+                
+                switch(this.outputFormat) {
+                    case 'complex':
+                        return `${value.real.toFixed(4)} + ${value.imag.toFixed(4)}i`;
+                    case 'magnitude':
+                        return Math.sqrt(value.real**2 + value.imag**2).toFixed(4);
+                    case 'phase':
+                        return Math.atan2(value.imag, value.real).toFixed(4);
+                    case 'real':
+                        return value.real.toFixed(4);
+                    case 'imaginary':
+                        return value.imag.toFixed(4);
+                    default:
+                        return value.toFixed(4);
+                }
+            },
+            
+            updateCharts() {
+                if (!this.timeDomainData || !this.results) return;
+                
+                // Time domain data
+                const timeStep = (this.timeEnd - this.timeStart) / (this.timeDomainData.length - 1);
+                const timeLabels = Array.from({ length: this.timeDomainData.length }, (_, i) => 
+                    (this.timeStart + i * timeStep).toFixed(2));
+                
+                this.timeChart.data.labels = timeLabels;
+                this.timeChart.data.datasets[0].data = this.timeDomainData;
+                this.timeChart.update();
+                
+                // Frequency domain data
+                const freqLabels = Array.from({ length: this.results.length }, (_, i) => 
+                    (i * this.frequencyResolution).toFixed(2));
+                
+                let freqData;
+                switch(this.outputFormat) {
+                    case 'magnitude':
+                        freqData = this.results.map(v => Math.sqrt(v.real**2 + v.imag**2));
+                        this.freqChart.options.scales.y.title.text = 'Magnitude';
+                        break;
+                    case 'phase':
+                        freqData = this.results.map(v => Math.atan2(v.imag, v.real));
+                        this.freqChart.options.scales.y.title.text = 'Phase (rad)';
+                        break;
+                    case 'real':
+                        freqData = this.results.map(v => v.real);
+                        this.freqChart.options.scales.y.title.text = 'Real Part';
+                        break;
+                    case 'imaginary':
+                        freqData = this.results.map(v => v.imag);
+                        this.freqChart.options.scales.y.title.text = 'Imaginary Part';
+                        break;
+                    default:
+                        freqData = this.results.map(v => Math.sqrt(v.real**2 + v.imag**2));
+                }
+                
+                this.freqChart.data.labels = freqLabels;
+                this.freqChart.data.datasets[0].data = freqData;
+                this.freqChart.update();
+            }
+        }
+    }
+</script>
+{% endblock %}

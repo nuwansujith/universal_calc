@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Texas Paycheck Calculator 2024 | Accurate Take-Home Pay Estimate{% endblock %}
+
+{% block meta_description %}Calculate your Texas paycheck with our free 2024 paycheck calculator. Estimate take-home pay after federal taxes, Social Security, and Medicare for Texas residents. No state income tax calculations needed.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Texas Paycheck Calculator 2024</h1>
+        
+        <div x-data="paycheckCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="grossPay" class="block text-sm font-medium text-gray-700 mb-1">Gross Pay ($)</label>
+                    <input x-model="grossPay" type="number" id="grossPay" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
+                </div>
+                <div>
+                    <label for="payFrequency" class="block text-sm font-medium text-gray-700 mb-1">Pay Frequency</label>
+                    <select x-model="payFrequency" id="payFrequency" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="weekly">Weekly</option>
+                        <option value="biweekly">Bi-Weekly</option>
+                        <option value="semimonthly">Semi-Monthly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="annually">Annually</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="federalFilingStatus" class="block text-sm font-medium text-gray-700 mb-1">Federal Filing Status</label>
+                    <select x-model="federalFilingStatus" id="federalFilingStatus" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="single">Single</option>
+                        <option value="married">Married Filing Jointly</option>
+                        <option value="head">Head of Household</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="federalAllowances" class="block text-sm font-medium text-gray-700 mb-1">Federal Allowances</label>
+                    <input x-model="federalAllowances" type="number" id="federalAllowances" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0" value="0">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label for="additionalWithholding" class="block text-sm font-medium text-gray-700 mb-1">Additional Withholding ($)</label>
+                    <input x-model="additionalWithholding" type="number" id="additionalWithholding" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00" value="0">
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate My Texas Paycheck
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Your Texas Paycheck Details</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Gross Pay: <span class="font-bold" x-text="'$' + result.grossPay"></span></p>
+                            <p>Federal Tax: <span class="font-bold" x-text="'$' + result.federalTax"></span></p>
+                            <p>Social Security: <span class="font-bold" x-text="'$' + result.socialSecurity"></span></p>
+                            <p>Medicare: <span class="font-bold" x-text="'$' + result.medicare"></span></p>
+                            <p class="pt-2 border-t border-green-200">Net Pay: <span class="font-bold text-lg" x-text="'$' + result.netPay"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-800">Error</h3>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <h2 class="text-xl font-semibold text-dark mb-4">Texas Paycheck Calculator Information</h2>
+        <p class="text-gray-600 mb-4">Our free Texas paycheck calculator helps you estimate your take-home pay after federal taxes and deductions. Since Texas has no state income tax, you'll only need to calculate federal withholdings, Social Security, and Medicare contributions.</p>
+        
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">Texas Tax Information (2024):</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+                <li>• <strong>No State Income Tax</strong> - Texas is one of 9 states with no personal income tax</li>
+                <li>• Social Security: 6.2% on income up to $168,600 (2024 limit)</li>
+                <li>• Medicare: 1.45% on all income (2.35% over $200,000 for single filers)</li>
+                <li>• Federal Income Tax: Calculated based on your filing status and allowances</li>
+                <li>• Local Taxes: Generally none, but some cities may have occupational taxes</li>
+            </ul>
+        </div>
+        
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">How to Use Our Texas Paycheck Calculator:</h3>
+            <ol class="list-decimal list-inside space-y-2 text-sm text-gray-600">
+                <li>Enter your gross pay amount before any deductions</li>
+                <li>Select how often you get paid (weekly, bi-weekly, etc.)</li>
+                <li>Choose your federal tax filing status (single, married, etc.)</li>
+                <li>Enter any federal tax allowances from your W-4 form</li>
+                <li>Add any additional withholding you want deducted</li>
+                <li>Click "Calculate My Texas Paycheck" for your net pay estimate</li>
+            </ol>
+        </div>
+
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">Texas-Specific Tax Advantages:</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+                <li>• <strong>No state income tax</strong> means more take-home pay compared to many other states</li>
+                <li>• Paycheck calculations are simpler without state tax withholding</li>
+                <li>• Texas has relatively high property taxes that offset the lack of income tax</li>
+                <li>• Some Texas cities may have local taxes for specific occupations</li>
+                <li>• Our calculator helps Texas residents budget accurately without state tax complications</li>
+            </ul>
+        </div>
+
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">Frequently Asked Questions:</h3>
+            <div class="space-y-4">
+                <div>
+                    <h4 class="font-medium text-gray-700">Why doesn't Texas have state income tax?</h4>
+                    <p class="text-sm text-gray-600 mt-1">Texas generates revenue through other means like higher property taxes and sales taxes instead of a personal income tax. This makes paycheck calculations simpler for Texas residents.</p>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-700">What taxes will appear on my Texas paycheck?</h4>
+                    <p class="text-sm text-gray-600 mt-1">Your Texas paycheck will only show federal income tax withholding, Social Security (6.2%), and Medicare (1.45%) deductions. No state income tax will be withheld.</p>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-700">How accurate is this Texas paycheck calculator?</h4>
+                    <p class="text-sm text-gray-600 mt-1">Our calculator provides estimates based on current 2024 tax rates and brackets. For exact figures, consult a tax professional or your payroll department.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function paycheckCalculator() {
+        return {
+            grossPay: null,
+            payFrequency: 'biweekly',
+            federalFilingStatus: 'single',
+            federalAllowances: 0,
+            additionalWithholding: 0,
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                // Validate inputs
+                if (!this.grossPay || this.grossPay <= 0) {
+                    this.error = 'Please enter a valid gross pay amount';
+                    return;
+                }
+                
+                // Convert to annual if needed
+                let annualGross = parseFloat(this.grossPay);
+                
+                switch(this.payFrequency) {
+                    case 'weekly':
+                        annualGross *= 52;
+                        break;
+                    case 'biweekly':
+                        annualGross *= 26;
+                        break;
+                    case 'semimonthly':
+                        annualGross *= 24;
+                        break;
+                    case 'monthly':
+                        annualGross *= 12;
+                        break;
+                    // annual is already annual
+                }
+                
+                // Calculate federal tax (simplified)
+                let federalTax = 0;
+                if (annualGross > 0) {
+                    const standardDeduction = this.federalFilingStatus === 'single' ? 13850 : 
+                                           this.federalFilingStatus === 'married' ? 27700 : 20800;
+                    const taxableIncome = Math.max(0, annualGross - standardDeduction - (this.federalAllowances * 4300));
+                    
+                    // Progressive tax brackets (2023)
+                    if (taxableIncome > 0) {
+                        const brackets = this.federalFilingStatus === 'single' ? 
+                            [[0, 10275, 0.10], [10275, 41775, 0.12], [41775, 89075, 0.22], 
+                             [89075, 170050, 0.24], [170050, 215950, 0.32], 
+                             [215950, 539900, 0.35], [539900, Infinity, 0.37]] :
+                            [[0, 20550, 0.10], [20550, 83550, 0.12], [83550, 178150, 0.22], 
+                             [178150, 340100, 0.24], [340100, 431900, 0.32], 
+                             [431900, 647850, 0.35], [647850, Infinity, 0.37]];
+                        
+                        for (const [min, max, rate] of brackets) {
+                            if (taxableIncome > min) {
+                                federalTax += (Math.min(taxableIncome, max) - min) * rate;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                // Calculate FICA taxes
+                const socialSecurity = Math.min(annualGross, 160200) * 0.062;
+                const medicare = annualGross * (annualGross > (this.federalFilingStatus === 'single' ? 200000 : 250000) ? 0.0235 : 0.0145);
+                
+                // Add additional withholding
+                const additionalWithholdingAnnual = parseFloat(this.additionalWithholding) || 0;
+                switch(this.payFrequency) {
+                    case 'weekly':
+                        additionalWithholdingAnnual *= 52;
+                        break;
+                    case 'biweekly':
+                        additionalWithholdingAnnual *= 26;
+                        break;
+                    case 'semimonthly':
+                        additionalWithholdingAnnual *= 24;
+                        break;
+                    case 'monthly':
+                        additionalWithholdingAnnual *= 12;
+                        break;
+                    // annual is already annual
+                }
+                
+                // Calculate net pay (no state tax for Texas)
+                const totalDeductions = federalTax + socialSecurity + medicare + additionalWithholdingAnnual;
+                const netPay = annualGross - totalDeductions;
+                
+                // Convert back to pay period
+                let divisor = 1;
+                switch(this.payFrequency) {
+                    case 'weekly':
+                        divisor = 52;
+                        break;
+                    case 'biweekly':
+                        divisor = 26;
+                        break;
+                    case 'semimonthly':
+                        divisor = 24;
+                        break;
+                    case 'monthly':
+                        divisor = 12;
+                        break;
+                    // annual is already annual
+                }
+                
+                this.result = {
+                    grossPay: (annualGross / divisor).toFixed(2),
+                    federalTax: (federalTax / divisor).toFixed(2),
+                    socialSecurity: (socialSecurity / divisor).toFixed(2),
+                    medicare: (medicare / divisor).toFixed(2),
+                    netPay: (netPay / divisor).toFixed(2)
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

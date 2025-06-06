@@ -1,0 +1,498 @@
+{% extends "base.html" %}
+
+{% block title %}UniversalCalc - 50+ Specialized Calculators for Construction, Finance, Health & Education{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Free online calculators for construction, finance, health, education and more. Accurate calculations for concrete, mortgage, BMI, GPA and 50+ other specialized tools.">
+<meta name="keywords" content="online calculator, construction calculator, mortgage calculator, BMI calculator, GPA calculator, financial calculator, health calculator, education calculator">
+<meta property="og:title" content="UniversalCalc - Comprehensive Calculator Collection">
+<meta property="og:description" content="50+ specialized calculators for all your calculation needs in one place">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.universalcalc.com">
+<link rel="canonical" href="https://www.universalcalc.com" />
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Hero Section with Schema Markup -->
+    <section class="gradient-bg text-white rounded-xl p-8 mb-12 shadow-lg" itemscope itemtype="https://schema.org/WebApplication">
+        <div class="max-w-3xl mx-auto text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-6" itemprop="name">Your All-in-One Calculator Solution</h1>
+            <p class="text-xl mb-8" itemprop="description">Access over 50 specialized calculators for construction, finance, health, education, and more - all in one place.</p>
+            <meta itemprop="applicationCategory" content="Calculator" />
+            <meta itemprop="operatingSystem" content="Web browser" />
+        </div>
+    </section>
+
+    <!-- Featured Categories -->
+    <section class="mb-16">
+        <h2 class="text-3xl font-bold mb-8 text-center">Popular Calculator Categories</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Construction -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300" itemscope itemtype="https://schema.org/ItemList">
+                <div class="gradient-bg text-white p-4">
+                    <i class="fas fa-hammer text-2xl mb-2"></i>
+                    <h3 class="text-xl font-semibold" itemprop="name">Construction Calculators</h3>
+                </div>
+                <div class="p-4">
+                    <ul class="space-y-2">
+                        <li itemprop="itemListElement"><a href="/concrete" class="text-primary hover:underline">Concrete Calculator</a></li>
+                        <li itemprop="itemListElement"><a href="/board-foot" class="text-primary hover:underline">Board Foot Calculator</a></li>
+                        <li itemprop="itemListElement"><a href="/roofing-calculator" class="text-primary hover:underline">Roofing Calculator</a></li>
+                        <li itemprop="itemListElement"><a href="/drywall-calculator" class="text-primary hover:underline">Drywall Calculator</a></li>
+                        <li itemprop="itemListElement"><a href="/rebar-calculator" class="text-primary hover:underline">Rebar Calculator</a></li>
+                    </ul>
+                    <a href="#construction" class="block mt-4 text-secondary font-medium hover:underline">View all 12 construction tools →</a>
+                </div>
+            </div>
+
+            <!-- Finance & Mortgage -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300" itemscope itemtype="https://schema.org/ItemList">
+                <div class="gradient-bg text-white p-4">
+                    <i class="fas fa-chart-line text-2xl mb-2"></i>
+                    <h3 class="text-xl font-semibold" itemprop="name">Finance Calculators</h3>
+                </div>
+                <div class="p-4">
+                    <ul class="space-y-2">
+                        <li itemprop="itemListElement"><a href="/heloc-calculator" class="text-primary hover:underline">HELOC Calculator</a></li>
+                        <li itemprop="itemListElement"><a href="/mortgage-recast-calculator" class="text-primary hover:underline">Mortgage Recast</a></li>
+                        <li itemprop="itemListElement"><a href="/dscr-loan-calculator" class="text-primary hover:underline">DSCR Loan Calculator</a></li>
+                        <li itemprop="itemListElement"><a href="/biweekly-mortgage-calculator" class="text-primary hover:underline">Biweekly Mortgage</a></li>
+                        <li itemprop="itemListElement"><a href="/early-payoff-calculator" class="text-primary hover:underline">Early Payoff Calculator</a></li>
+                    </ul>
+                    <a href="#finance" class="block mt-4 text-secondary font-medium hover:underline">View all 11 finance tools →</a>
+                </div>
+            </div>
+
+            <!-- Health & Fitness -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300" itemscope itemtype="https://schema.org/ItemList">
+                <div class="gradient-bg text-white p-4">
+                    <i class="fas fa-heartbeat text-2xl mb-2"></i>
+                    <h3 class="text-xl font-semibold" itemprop="name">Health Calculators</h3>
+                </div>
+                <div class="p-4">
+                    <ul class="space-y-2">
+                        <li itemprop="itemListElement"><a href="/bmi-calculator" class="text-primary hover:underline">BMI Calculator</a></li>
+                        <li itemprop="itemListElement"><a href="/waist-hip-ratio" class="text-primary hover:underline">Waist-Hip Ratio</a></li>
+                        <li itemprop="itemListElement"><a href="/homa-ir-calculator" class="text-primary hover:underline">HOMA-IR Calculator</a></li>
+                        <li itemprop="itemListElement"><a href="/anc-calculator" class="text-primary hover:underline">ANC Calculator</a></li>
+                        <li itemprop="itemListElement"><a href="/pregnancy-calculator" class="text-primary hover:underline">Pregnancy Calculator</a></li>
+                    </ul>
+                    <a href="#health" class="block mt-4 text-secondary font-medium hover:underline">View all 7 health tools →</a>
+                </div>
+            </div>
+
+            <!-- Education -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300" itemscope itemtype="https://schema.org/ItemList">
+                <div class="gradient-bg text-white p-4">
+                    <i class="fas fa-graduation-cap text-2xl mb-2"></i>
+                    <h3 class="text-xl font-semibold" itemprop="name">Education Calculators</h3>
+                </div>
+                <div class="p-4">
+                    <ul class="space-y-2">
+                        <li itemprop="itemListElement"><a href="/gpa-calculator" class="text-primary hover:underline">GPA Calculator</a></li>
+                        <li itemprop="itemListElement"><a href="/apush-calculator" class="text-primary hover:underline">APUSH Score Calculator</a></li>
+                        <li itemprop="itemListElement"><a href="/ap-lang-calculator" class="text-primary hover:underline">AP Lang Calculator</a></li>
+                        <li itemprop="itemListElement"><a href="/lsat-calculator" class="text-primary hover:underline">LSAT Calculator</a></li>
+                        <li itemprop="itemListElement"><a href="/digital-sat-calculator" class="text-primary hover:underline">Digital SAT Calculator</a></li>
+                    </ul>
+                    <a href="#education" class="block mt-4 text-secondary font-medium hover:underline">View all 7 education tools →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- All Tools Section with Schema Markup -->
+    <section class="mb-16">
+        <h2 class="text-3xl font-bold mb-8 text-center">Complete List of Online Calculators</h2>
+        
+        <!-- Construction -->
+        <div id="construction" class="mb-12">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-hammer text-2xl text-primary mr-3"></i>
+                <h3 class="text-2xl font-semibold">Construction Calculators for Builders & DIYers</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="/" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-cube text-primary mr-3"></i>
+                    <span>Cubic Yard Calculator</span>
+                </a>
+                <a href="/board-foot" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-ruler-combined text-primary mr-3"></i>
+                    <span>Board Foot Calculator</span>
+                </a>
+                <a href="/stone" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-mountain text-primary mr-3"></i>
+                    <span>Stone Calculator</span>
+                </a>
+                <a href="/gravel" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-road text-primary mr-3"></i>
+                    <span>Gravel Calculator</span>
+                </a>
+                <a href="/sand" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-hourglass-half text-primary mr-3"></i>
+                    <span>Sand Calculator</span>
+                </a>
+                <a href="/tank-volume" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-tint text-primary mr-3"></i>
+                    <span>Tank Volume Calculator</span>
+                </a>
+                <a href="/concrete" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-building text-primary mr-3"></i>
+                    <span>Concrete Calculator</span>
+                </a>
+                <a href="/drywall-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-home text-primary mr-3"></i>
+                    <span>Drywall Calculator</span>
+                </a>
+                <a href="/rebar-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-grip-lines text-primary mr-3"></i>
+                    <span>Rebar Calculator</span>
+                </a>
+                <a href="/roofing-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-vector-square text-primary mr-3"></i>
+                    <span>Roofing Calculator</span>
+                </a>
+                <a href="/paver-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-border-style text-primary mr-3"></i>
+                    <span>Pavers Calculator</span>
+                </a>
+                <a href="/framing-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-ruler-vertical text-primary mr-3"></i>
+                    <span>Framing Calculator</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Math & Science -->
+        <div id="math" class="mb-12">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-square-root-alt text-2xl text-primary mr-3"></i>
+                <h3 class="text-2xl font-semibold">Math & Science Calculators for Students & Professionals</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="/eigenvalue-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-infinity text-primary mr-3"></i>
+                    <span>Eigenvalue Calculator</span>
+                </a>
+                <a href="/rref-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-table text-primary mr-3"></i>
+                    <span>RREF Calculator (Matrix)</span>
+                </a>
+                <a href="/matrix-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-border-all text-primary mr-3"></i>
+                    <span>Matrix Calculator</span>
+                </a>
+                <a href="/gaussian-elimination" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-project-diagram text-primary mr-3"></i>
+                    <span>Gaussian Elimination Calculator</span>
+                </a>
+                <a href="/fourier-transform" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-wave-square text-primary mr-3"></i>
+                    <span>Fourier Transform Calculator</span>
+                </a>
+                <a href="/quadratic-regression" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-chart-line text-primary mr-3"></i>
+                    <span>Quadratic Regression Calculator</span>
+                </a>
+                <a href="/discriminant-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-superscript text-primary mr-3"></i>
+                    <span>Discriminant Calculator</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Automotive & Engineering -->
+        <div id="automotive" class="mb-12">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-car-alt text-2xl text-primary mr-3"></i>
+                <h3 class="text-2xl font-semibold">Automotive & Engineering Calculators</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="/0-60-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-tachometer-alt text-primary mr-3"></i>
+                    <span>0-60 MPH Calculator</span>
+                </a>
+                <a href="/quarter-mile-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-flag-checkered text-primary mr-3"></i>
+                    <span>1/4 Mile Calculator</span>
+                </a>
+                <a href="/engine-displacement-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-cogs text-primary mr-3"></i>
+                    <span>Engine Displacement Calculator</span>
+                </a>
+                <a href="/towing-estimate-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-trailer text-primary mr-3"></i>
+                    <span>Towing Estimate Calculator</span>
+                </a>
+                <a href="/power-to-weight-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-weight text-primary mr-3"></i>
+                    <span>Power-to-Weight Ratio Calculator</span>
+                </a>
+                <a href="/gear-ratio-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-cog text-primary mr-3"></i>
+                    <span>Gear Ratio Calculator</span>
+                </a>
+                <a href="/beam-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-ruler-combined text-primary mr-3"></i>
+                    <span>Beam Calculator</span>
+                </a>
+                <a href="/moment-of-inertia-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-circle-notch text-primary mr-3"></i>
+                    <span>Moment of Inertia Calculator</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Mortgage & Loan -->
+        <div id="finance" class="mb-12">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-home text-2xl text-primary mr-3"></i>
+                <h3 class="text-2xl font-semibold">Mortgage & Loan Calculators for Home Buyers</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="/heloc-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-home text-primary mr-3"></i>
+                    <span>HELOC Calculator</span>
+                </a>
+                <a href="/mortgage-recast-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-file-invoice-dollar text-primary mr-3"></i>
+                    <span>Mortgage Recast Calculator</span>
+                </a>
+                <a href="/construction-loan-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-tools text-primary mr-3"></i>
+                    <span>Construction Loan Calculator</span>
+                </a>
+                <a href="/dscr-loan-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-hand-holding-usd text-primary mr-3"></i>
+                    <span>DSCR Loan Calculator</span>
+                </a>
+                <a href="/biweekly-mortgage-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-calendar-alt text-primary mr-3"></i>
+                    <span>Biweekly Mortgage Calculator</span>
+                </a>
+                <a href="/usda-mortgage-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-tractor text-primary mr-3"></i>
+                    <span>USDA Mortgage Calculator</span>
+                </a>
+                <a href="/early-payoff-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-money-bill-wave text-primary mr-3"></i>
+                    <span>Early Payoff Calculator</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Financial & Paycheck -->
+        <div id="paycheck" class="mb-12">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-money-bill-wave text-2xl text-primary mr-3"></i>
+                <h3 class="text-2xl font-semibold">Financial & Paycheck Calculators by State</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="/ohio-paycheck-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-map-marker-alt text-primary mr-3"></i>
+                    <span>Ohio Paycheck Calculator</span>
+                </a>
+                <a href="/michigan-paycheck-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-map-marker-alt text-primary mr-3"></i>
+                    <span>Michigan Paycheck Calculator</span>
+                </a>
+                <a href="/nj-paycheck-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-map-marker-alt text-primary mr-3"></i>
+                    <span>New Jersey Paycheck Calculator</span>
+                </a>
+                <a href="/virginia-paycheck-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-map-marker-alt text-primary mr-3"></i>
+                    <span>Virginia Paycheck Calculator</span>
+                </a>
+                <a href="/colorado-paycheck-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-map-marker-alt text-primary mr-3"></i>
+                    <span>Colorado Paycheck Calculator</span>
+                </a>
+                <a href="/texas-paycheck-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-map-marker-alt text-primary mr-3"></i>
+                    <span>Texas Paycheck Calculator</span>
+                </a>
+                <a href="/hsa-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-piggy-bank text-primary mr-3"></i>
+                    <span>HSA Calculator</span>
+                </a>
+                <a href="/bonus-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-gift text-primary mr-3"></i>
+                    <span>Bonus Tax Calculator</span>
+                </a>
+                <a href="/child-support-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-baby text-primary mr-3"></i>
+                    <span>Child Support Calculator</span>
+                </a>
+                <a href="/reverse-tax-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-calculator text-primary mr-3"></i>
+                    <span>Reverse Tax Calculator</span>
+                </a>
+                <a href="/cash-on-cash-return" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-hand-holding-usd text-primary mr-3"></i>
+                    <span>Cash on Cash Return Calculator</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Health & Fitness -->
+        <div id="health" class="mb-12">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-heartbeat text-2xl text-primary mr-3"></i>
+                <h3 class="text-2xl font-semibold">Health & Fitness Calculators for Wellness</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="/waist-hip-ratio" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-ruler-combined text-primary mr-3"></i>
+                    <span>Waist-to-Hip Ratio Calculator</span>
+                </a>
+                <a href="/fasting-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-clock text-primary mr-3"></i>
+                    <span>Fasting Calculator</span>
+                </a>
+                <a href="/anc-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-microscope text-primary mr-3"></i>
+                    <span>ANC Calculator (Neutrophils)</span>
+                </a>
+                <a href="/homa-ir-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-vial text-primary mr-3"></i>
+                    <span>HOMA-IR Calculator</span>
+                </a>
+                <a href="/steroid-conversion-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-prescription-bottle-alt text-primary mr-3"></i>
+                    <span>Steroid Conversion Calculator</span>
+                </a>
+                <a href="/bmi-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-weight text-primary mr-3"></i>
+                    <span>BMI Calculator</span>
+                </a>
+                <a href="/pregnancy-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-baby text-primary mr-3"></i>
+                    <span>Pregnancy Calculator</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Education & Academic -->
+        <div id="education" class="mb-12">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-graduation-cap text-2xl text-primary mr-3"></i>
+                <h3 class="text-2xl font-semibold">Education & Academic Calculators for Students</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="/gpa-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-award text-primary mr-3"></i>
+                    <span>Cumulative GPA Calculator</span>
+                </a>
+                <a href="/apush-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-landmark text-primary mr-3"></i>
+                    <span>APUSH Score Calculator</span>
+                </a>
+                <a href="/ap-lang-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-language text-primary mr-3"></i>
+                    <span>AP Lang Score Calculator</span>
+                </a>
+                <a href="/lsat-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-gavel text-primary mr-3"></i>
+                    <span>LSAT Score Calculator</span>
+                </a>
+                <a href="/digital-sat-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-pencil-alt text-primary mr-3"></i>
+                    <span>Digital SAT Score Calculator</span>
+                </a>
+                <a href="/lsac-gpa-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-balance-scale text-primary mr-3"></i>
+                    <span>LSAC GPA Calculator</span>
+                </a>
+                <a href="/ib-grade-calculator" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center" itemprop="relatedLink">
+                    <i class="fas fa-globe-europe text-primary mr-3"></i>
+                    <span>IB Grade Calculator</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials with Schema Markup -->
+    <section class="bg-white rounded-xl shadow-lg p-8 mb-12">
+        <h2 class="text-3xl font-bold mb-8 text-center">What Our Users Say About Our Calculators</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8" itemscope itemtype="https://schema.org/Review">
+            <div class="bg-gray-50 p-6 rounded-lg" itemprop="itemReviewed" itemscope itemtype="https://schema.org/WebApplication">
+                <div class="flex items-center mb-4">
+                    <div class="text-yellow-400 mr-2" itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating">
+                        <meta itemprop="ratingValue" content="5" />
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                <p class="text-gray-600 mb-4" itemprop="reviewBody">"The concrete calculator saved me so much time on my patio project. Accurate and easy to use!"</p>
+                <div class="flex items-center" itemprop="author" itemscope itemtype="https://schema.org/Person">
+                    <div class="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                        <span>JD</span>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold" itemprop="name">John D.</h4>
+                        <p class="text-gray-500 text-sm">Construction Professional</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 p-6 rounded-lg" itemprop="itemReviewed" itemscope itemtype="https://schema.org/WebApplication">
+                <div class="flex items-center mb-4">
+                    <div class="text-yellow-400 mr-2" itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating">
+                        <meta itemprop="ratingValue" content="5" />
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                <p class="text-gray-600 mb-4" itemprop="reviewBody">"As a student, the GPA calculator helped me plan my semester perfectly. Essential tool!"</p>
+                <div class="flex items-center" itemprop="author" itemscope itemtype="https://schema.org/Person">
+                    <div class="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                        <span>SM</span>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold" itemprop="name">Sarah M.</h4>
+                        <p class="text-gray-500 text-sm">University Student</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 p-6 rounded-lg" itemprop="itemReviewed" itemscope itemtype="https://schema.org/WebApplication">
+                <div class="flex items-center mb-4">
+                    <div class="text-yellow-400 mr-2" itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating">
+                        <meta itemprop="ratingValue" content="4.5" />
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+                <p class="text-gray-600 mb-4" itemprop="reviewBody">"The mortgage calculators helped me understand my options when buying my first home."</p>
+                <div class="flex items-center" itemprop="author" itemscope itemtype="https://schema.org/Person">
+                    <div class="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                        <span>AR</span>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold" itemprop="name">Alex R.</h4>
+                        <p class="text-gray-500 text-sm">Home Buyer</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="gradient-bg text-white rounded-xl p-8 mb-12 text-center">
+        <h2 class="text-3xl font-bold mb-4">Ready to Calculate?</h2>
+        <p class="text-xl mb-6">Start using our free online calculators now to simplify your projects and decisions.</p>
+        <a href="#construction" class="bg-white text-primary font-semibold py-3 px-6 rounded-lg hover:bg-gray-100 transition-colors inline-block">
+            Browse All 50+ Calculators
+        </a>
+    </section>
+</div>
+{% endblock %}

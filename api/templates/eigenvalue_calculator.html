@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block title %}Eigenvalue Calculator - Find Matrix Eigenvalues Online | Math Tools{% endblock %}
+
+{% block meta_description %}Free online eigenvalue calculator for 2x2 and 3x3 matrices. Calculate eigenvalues, eigenvectors, trace, and determinant instantly. Perfect for linear algebra students and professionals.{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Eigenvalue Calculator</h1>
+        
+        <div x-data="eigenvalueCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="a11" class="block text-sm font-medium text-gray-700 mb-1">a₁₁</label>
+                    <input x-model="matrix[0][0]" type="number" step="0.01" id="a11" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0">
+                </div>
+                <div>
+                    <label for="a12" class="block text-sm font-medium text-gray-700 mb-1">a₁₂</label>
+                    <input x-model="matrix[0][1]" type="number" step="0.01" id="a12" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0">
+                </div>
+                <div>
+                    <label for="a13" class="block text-sm font-medium text-gray-700 mb-1">a₁₃</label>
+                    <input x-model="matrix[0][2]" type="number" step="0.01" id="a13" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="a21" class="block text-sm font-medium text-gray-700 mb-1">a₂₁</label>
+                    <input x-model="matrix[1][0]" type="number" step="0.01" id="a21" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0">
+                </div>
+                <div>
+                    <label for="a22" class="block text-sm font-medium text-gray-700 mb-1">a₂₂</label>
+                    <input x-model="matrix[1][1]" type="number" step="0.01" id="a22" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0">
+                </div>
+                <div>
+                    <label for="a23" class="block text-sm font-medium text-gray-700 mb-1">a₂₃</label>
+                    <input x-model="matrix[1][2]" type="number" step="0.01" id="a23" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="a31" class="block text-sm font-medium text-gray-700 mb-1">a₃₁</label>
+                    <input x-model="matrix[2][0]" type="number" step="0.01" id="a31" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0">
+                </div>
+                <div>
+                    <label for="a32" class="block text-sm font-medium text-gray-700 mb-1">a₃₂</label>
+                    <input x-model="matrix[2][1]" type="number" step="0.01" id="a32" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0">
+                </div>
+                <div>
+                    <label for="a33" class="block text-sm font-medium text-gray-700 mb-1">a₃₃</label>
+                    <input x-model="matrix[2][2]" type="number" step="0.01" id="a33" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0">
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <div>
+                    <label for="matrixSize" class="block text-sm font-medium text-gray-700 mb-1">Matrix Size</label>
+                    <select x-model="matrixSize" @change="changeMatrixSize()" id="matrixSize" class="px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="2">2×2 Matrix</option>
+                        <option value="3" selected>3×3 Matrix</option>
+                    </select>
+                </div>
+                <button @click="calculate()" class="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-md transition duration-200">
+                    Calculate Eigenvalues
+                </button>
+            </div>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Eigenvalue Results</h2>
+                        <div class="mt-1 text-green-700 space-y-2">
+                            <template x-for="(eigenvalue, index) in result.eigenvalues">
+                                <p>
+                                    Eigenvalue <span x-text="index + 1"></span>: 
+                                    <span class="font-bold" x-text="eigenvalue.re.toFixed(4) + (eigenvalue.im !== 0 ? ' + ' + eigenvalue.im.toFixed(4) + 'i' : '')"></span>
+                                </p>
+                            </template>
+                            <p>Matrix Trace: <span class="font-bold" x-text="result.trace.toFixed(4)"></span></p>
+                            <p>Matrix Determinant: <span class="font-bold" x-text="result.determinant.toFixed(4)"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-800">Calculation Error</h3>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">Understanding Eigenvalues and Eigenvectors</h2>
+            <p class="text-gray-600 mb-4">Eigenvalues are fundamental concepts in linear algebra that reveal important properties about linear transformations represented by matrices. Our eigenvalue calculator helps you find these special numbers quickly for both 2×2 and 3×3 matrices, along with related matrix properties like trace and determinant.</p>
+            
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Key Concepts in Eigenvalue Analysis:</h3>
+                <ul class="grid grid-cols-1 gap-2 text-sm text-gray-600">
+                    <li>• <strong>Eigenvalue (λ)</strong>: A scalar such that for a matrix A, there exists a non-zero vector v where Av = λv</li>
+                    <li>• <strong>Eigenvector</strong>: The vector v in the equation above that only scales when the matrix is applied</li>
+                    <li>• <strong>Characteristic Polynomial</strong>: det(A - λI) = 0, where I is the identity matrix - the roots are eigenvalues</li>
+                    <li>• <strong>Trace</strong>: Sum of diagonal elements (equals sum of eigenvalues)</li>
+                    <li>• <strong>Determinant</strong>: Product of eigenvalues, indicating whether the matrix is invertible</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Real-World Applications of Eigenvalues:</h3>
+                <ul class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                    <li>• Stability analysis in differential equations</li>
+                    <li>• Principal component analysis (PCA) in statistics</li>
+                    <li>• Quantum mechanics and Schrödinger's equation</li>
+                    <li>• Vibration analysis in mechanical engineering</li>
+                    <li>• Google's PageRank algorithm</li>
+                    <li>• Facial recognition and computer vision</li>
+                    <li>• Mechanical stress and strain analysis</li>
+                    <li>• Electrical circuit analysis and system stability</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">How Our Eigenvalue Calculator Works:</h3>
+                <ul class="text-sm text-gray-600 ml-4 list-disc">
+                    <li><strong>For 2×2 Matrices:</strong> Direct solution from characteristic polynomial using the quadratic formula</li>
+                    <li><strong>For 3×3 Matrices:</strong> Numerical solution using Cardano's formula for cubic equations</li>
+                    <li><strong>Results Include:</strong> All eigenvalues (real and complex), matrix trace, and determinant</li>
+                </ul>
+                <p class="text-sm text-gray-600 mt-2">This tool is perfect for students learning linear algebra, engineers analyzing systems, or anyone needing quick eigenvalue calculations without manual computation.</p>
+            </section>
+        </article>
+    </div>
+</div>
+
+<script>
+    function eigenvalueCalculator() {
+        return {
+            matrixSize: '3',
+            matrix: [
+                [1, 0, 0],
+                [0, 1, 0],
+                [0, 0, 1]
+            ],
+            result: null,
+            error: null,
+            
+            changeMatrixSize() {
+                const size = parseInt(this.matrixSize);
+                // Reset matrix when changing size
+                this.matrix = Array(size).fill().map(() => Array(size).fill(0));
+                this.result = null;
+                this.error = null;
+            },
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                const size = parseInt(this.matrixSize);
+                const A = this.matrix.slice(0, size).map(row => row.slice(0, size));
+                
+                // Validate matrix
+                for (let i = 0; i < size; i++) {
+                    for (let j = 0; j < size; j++) {
+                        if (isNaN(A[i][j])) {
+                            this.error = `Please enter a valid number for a${i+1}${j+1}`;
+                            return;
+                        }
+                    }
+                }
+                
+                // Calculate trace and determinant
+                let trace = 0;
+                for (let i = 0; i < size; i++) {
+                    trace += A[i][i];
+                }
+                
+                let determinant;
+                if (size === 2) {
+                    determinant = A[0][0] * A[1][1] - A[0][1] * A[1][0];
+                } else {
+                    determinant = this.calculate3x3Determinant(A);
+                }
+                
+                // Calculate eigenvalues based on matrix size
+                let eigenvalues;
+                if (size === 2) {
+                    eigenvalues = this.calculate2x2Eigenvalues(A);
+                } else {
+                    eigenvalues = this.calculate3x3Eigenvalues(A);
+                }
+                
+                this.result = {
+                    eigenvalues: eigenvalues,
+                    trace: trace,
+                    determinant: determinant
+                };
+            },
+            
+            calculate2x2Eigenvalues(A) {
+                const a = A[0][0], b = A[0][1];
+                const c = A[1][0], d = A[1][1];
+                
+                // Calculate discriminant
+                const tr = a + d;
+                const det = a * d - b * c;
+                const discriminant = tr * tr - 4 * det;
+                
+                if (discriminant >= 0) {
+                    const sqrtDisc = Math.sqrt(discriminant);
+                    const lambda1 = (tr + sqrtDisc) / 2;
+                    const lambda2 = (tr - sqrtDisc) / 2;
+                    return [
+                        { re: lambda1, im: 0 },
+                        { re: lambda2, im: 0 }
+                    ];
+                } else {
+                    const sqrtDisc = Math.sqrt(-discriminant);
+                    const realPart = tr / 2;
+                    const imagPart = sqrtDisc / 2;
+                    return [
+                        { re: realPart, im: imagPart },
+                        { re: realPart, im: -imagPart }
+                    ];
+                }
+            },
+            
+            calculate3x3Eigenvalues(A) {
+                // Coefficients of characteristic polynomial: λ³ + aλ² + bλ + c = 0
+                const a = -(A[0][0] + A[1][1] + A[2][2]);
+                const b = A[0][0]*A[1][1] + A[0][0]*A[2][2] + A[1][1]*A[2][2] - A[0][1]*A[1][0] - A[0][2]*A[2][0] - A[1][2]*A[2][1];
+                const c = -(A[0][0]*A[1][1]*A[2][2] + A[0][1]*A[1][2]*A[2][0] + A[0][2]*A[1][0]*A[2][1] 
+                         - A[0][2]*A[1][1]*A[2][0] - A[0][1]*A[1][0]*A[2][2] - A[0][0]*A[1][2]*A[2][1]);
+                
+                // Use Cardano's formula for cubic equations
+                const Q = (a*a - 3*b)/9;
+                const R = (2*a*a*a - 9*a*b + 27*c)/54;
+                const Q3 = Q*Q*Q;
+                const D = Q3 - R*R;
+                
+                if (D >= 0) {
+                    // Three real roots
+                    const theta = Math.acos(R/Math.sqrt(Q3));
+                    const sqrtQ = Math.sqrt(Q);
+                    
+                    const lambda1 = -2 * sqrtQ * Math.cos(theta/3) - a/3;
+                    const lambda2 = -2 * sqrtQ * Math.cos((theta + 2*Math.PI)/3) - a/3;
+                    const lambda3 = -2 * sqrtQ * Math.cos((theta - 2*Math.PI)/3) - a/3;
+                    
+                    return [
+                        { re: lambda1, im: 0 },
+                        { re: lambda2, im: 0 },
+                        { re: lambda3, im: 0 }
+                    ];
+                } else {
+                    // One real root and two complex conjugate roots
+                    const sqrtD = Math.sqrt(-D);
+                    const S = Math.cbrt(R + sqrtD);
+                    const T = Math.cbrt(R - sqrtD);
+                    
+                    const lambda1 = (S + T) - a/3;
+                    const lambda2 = -(S + T)/2 - a/3;
+                    const lambda3Imag = (S - T)*Math.sqrt(3)/2;
+                    
+                    return [
+                        { re: lambda1, im: 0 },
+                        { re: lambda2, im: lambda3Imag },
+                        { re: lambda2, im: -lambda3Imag }
+                    ];
+                }
+            },
+            
+            calculate3x3Determinant(A) {
+                return A[0][0] * (A[1][1]*A[2][2] - A[1][2]*A[2][1]) -
+                       A[0][1] * (A[1][0]*A[2][2] - A[1][2]*A[2][0]) +
+                       A[0][2] * (A[1][0]*A[2][1] - A[1][1]*A[2][0]);
+            }
+        }
+    }
+</script>
+{% endblock %}

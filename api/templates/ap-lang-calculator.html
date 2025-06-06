@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}AP English Language Score Calculator | Predict Your AP Lang Exam Score{% endblock %}
+
+{% block meta_description %}Calculate your AP English Language exam score with our free tool. Predict your AP Lang score based on multiple choice and essay performance to see if you'll get a 5, 4, 3, 2, or 1.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto p-4">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">AP English Language and Composition Score Calculator</h1>
+        <p class="text-gray-600 mb-6">Estimate your AP Lang exam score based on the College Board's scoring guidelines</p>
+        
+        <div x-data="apLangCalculator()" class="space-y-6">
+            <!-- Multiple Choice Section -->
+            <div class="bg-blue-50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-blue-800 mb-3">Multiple Choice Section (45% of Score)</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answers (0-45)</label>
+                        <input x-model="mcCorrect" type="number" min="0" max="45" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Enter correct answers">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Raw Score</label>
+                        <input x-model="mcRawScore" type="number" readonly class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Free Response Questions -->
+            <div class="bg-green-50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-green-800 mb-3">Free Response Section (55% of Score)</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Synthesis Essay (0-6)</label>
+                        <input x-model="essay1" type="number" min="0" max="6" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Rhetorical Analysis (0-6)</label>
+                        <input x-model="essay2" type="number" min="0" max="6" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Argument Essay (0-6)</label>
+                        <input x-model="essay3" type="number" min="0" max="6" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">FRQ Raw Score</label>
+                        <input x-model="frqRawScore" type="number" readonly class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calculate Button -->
+            <button @click="calculateScore()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate My AP Lang Score
+            </button>
+
+            <!-- Results -->
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-green-800">Your AP Lang Score Estimate</h3>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Composite Score: <span class="font-bold" x-text="result.compositeScore"></span>/150</p>
+                            <p>Predicted AP Score: <span class="font-bold" x-text="result.apScore"></span>/5</p>
+                            <p class="text-sm italic" x-text="result.scoreDescription"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">How to Calculate Your AP English Language Exam Score</h2>
+        <p class="text-gray-600 mb-4">Our AP Lang score calculator helps you predict your exam results based on the College Board's scoring system for the AP English Language and Composition test:</p>
+        <ul class="list-disc list-inside space-y-2 text-gray-600">
+            <li><strong>Multiple Choice Section (45% of score):</strong> Answer 45 questions correctly to earn 1 point each (45 points maximum).</li>
+            <li><strong>Free Response Section (55% of score):</strong> Write three essays scored on a 0-6 scale (18 points maximum).</li>
+            <li>The <strong>synthesis essay</strong> evaluates your ability to combine multiple sources into a coherent argument.</li>
+            <li>The <strong>rhetorical analysis essay</strong> tests your skill in analyzing how writers use language to achieve their purpose.</li>
+            <li>The <strong>argument essay</strong> assesses your ability to craft a persuasive, evidence-based argument.</li>
+            <li>Your composite score (0-150) is converted to the 1-5 AP scale using College Board standards.</li>
+        </ul>
+        
+        <h3 class="text-lg font-semibold text-gray-800 mt-6 mb-2">AP Lang Score Distribution</h3>
+        <p class="text-gray-600 mb-2">Typical score ranges for AP English Language:</p>
+        <ul class="list-disc list-inside space-y-1 text-gray-600">
+            <li><strong>5 (Extremely well qualified):</strong> 110-150 points (Top 10-15% of test takers)</li>
+            <li><strong>4 (Well qualified):</strong> 90-109 points (Next 15-20% of test takers)</li>
+            <li><strong>3 (Qualified):</strong> 70-89 points (Next 20-25% of test takers)</li>
+            <li><strong>2 (Possibly qualified):</strong> 50-69 points (Next 20-25% of test takers)</li>
+            <li><strong>1 (No recommendation):</strong> 0-49 points (Bottom 15-20% of test takers)</li>
+        </ul>
+        
+        <h3 class="text-lg font-semibold text-gray-800 mt-6 mb-2">Tips to Improve Your AP Lang Score</h3>
+        <ul class="list-disc list-inside space-y-1 text-gray-600">
+            <li>Practice analyzing rhetorical strategies in various texts</li>
+            <li>Work on synthesizing information from multiple sources</li>
+            <li>Develop a clear, organized writing style for your essays</li>
+            <li>Time yourself to complete essays within the 40-minute limit</li>
+            <li>Review sample high-scoring essays from past exams</li>
+        </ul>
+        
+        <p class="mt-4 text-sm text-gray-500">Note: This calculator provides an estimate based on typical score conversions. Official AP scores may vary slightly based on yearly adjustments by the College Board.</p>
+    </div>
+</div>
+
+<script>
+    function apLangCalculator() {
+        return {
+            mcCorrect: 0,
+            essay1: 0,
+            essay2: 0,
+            essay3: 0,
+            result: null,
+            
+            get mcRawScore() {
+                return this.mcCorrect || 0;
+            },
+            
+            get frqRawScore() {
+                return (parseInt(this.essay1) || 0) + (parseInt(this.essay2) || 0) + (parseInt(this.essay3) || 0);
+            },
+            
+            calculateScore() {
+                const compositeScore = Math.round(
+                    (this.mcRawScore * 1.6667) + // Weighted to 45% of total
+                    (this.frqRawScore * 4.5833)   // Weighted to 55% of total
+                );
+                
+                let apScore;
+                let scoreDescription;
+                
+                if (compositeScore >= 110) {
+                    apScore = 5;
+                    scoreDescription = "Excellent! You're likely to qualify for college credit (Top 10-15% of test takers)";
+                } else if (compositeScore >= 90) {
+                    apScore = 4;
+                    scoreDescription = "Strong performance! You're well qualified for college credit";
+                } else if (compositeScore >= 70) {
+                    apScore = 3;
+                    scoreDescription = "Good job! You're qualified for college credit at many schools";
+                } else if (compositeScore >= 50) {
+                    apScore = 2;
+                    scoreDescription = "You might qualify for credit at some schools";
+                } else {
+                    apScore = 1;
+                    scoreDescription = "Consider additional preparation before retaking the exam";
+                }
+                
+                this.result = {
+                    compositeScore: compositeScore,
+                    apScore: apScore,
+                    scoreDescription: scoreDescription
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

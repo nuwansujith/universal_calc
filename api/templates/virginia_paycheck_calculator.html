@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}Virginia Paycheck Calculator - Accurate Take-Home Pay Estimate | [Your Site Name]{% endblock %}
+
+{% block meta_description %}Calculate your Virginia paycheck after taxes with our free, accurate paycheck calculator. Estimate federal, state, and local tax withholdings for any pay frequency.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Virginia Paycheck Calculator</h1>
+        
+        <div class="prose prose-sm mb-6 text-gray-600">
+            <p>Use this free Virginia paycheck calculator to estimate your net take-home pay after federal, state, and local taxes. Get accurate calculations for weekly, bi-weekly, semi-monthly, monthly, or annual pay periods in Virginia.</p>
+        </div>
+        
+        <div x-data="paycheckCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="grossPay" class="block text-sm font-medium text-gray-700 mb-1">Gross Pay ($)</label>
+                    <input x-model="grossPay" type="number" id="grossPay" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
+                </div>
+                <div>
+                    <label for="payFrequency" class="block text-sm font-medium text-gray-700 mb-1">Pay Frequency</label>
+                    <select x-model="payFrequency" id="payFrequency" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="weekly">Weekly</option>
+                        <option value="biweekly">Bi-Weekly</option>
+                        <option value="semimonthly">Semi-Monthly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="annually">Annually</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="federalFilingStatus" class="block text-sm font-medium text-gray-700 mb-1">Federal Filing Status</label>
+                    <select x-model="federalFilingStatus" id="federalFilingStatus" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="single">Single</option>
+                        <option value="married">Married Filing Jointly</option>
+                        <option value="head">Head of Household</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="federalAllowances" class="block text-sm font-medium text-gray-700 mb-1">Federal Allowances</label>
+                    <input x-model="federalAllowances" type="number" id="federalAllowances" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0" value="0">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="stateAllowances" class="block text-sm font-medium text-gray-700 mb-1">Virginia State Allowances</label>
+                    <input x-model="stateAllowances" type="number" id="stateAllowances" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0" value="0">
+                </div>
+                <div>
+                    <label for="additionalWithholding" class="block text-sm font-medium text-gray-700 mb-1">Additional Withholding ($)</label>
+                    <input x-model="additionalWithholding" type="number" id="additionalWithholding" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00" value="0">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div class="flex items-center">
+                    <input x-model="includeLocalTax" type="checkbox" id="includeLocalTax" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                    <label for="includeLocalTax" class="ml-2 block text-sm text-gray-700">Include Local Taxes (if applicable)</label>
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate My Virginia Paycheck
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-green-800">Paycheck Details</h3>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Gross Pay: <span class="font-bold" x-text="'$' + result.grossPay"></span></p>
+                            <p>Federal Tax: <span class="font-bold" x-text="'$' + result.federalTax"></span></p>
+                            <p>Virginia State Tax: <span class="font-bold" x-text="'$' + result.stateTax"></span></p>
+                            <p x-show="result.localTax > 0">Local Tax: <span class="font-bold" x-text="'$' + result.localTax"></span></p>
+                            <p>Social Security: <span class="font-bold" x-text="'$' + result.socialSecurity"></span></p>
+                            <p>Medicare: <span class="font-bold" x-text="'$' + result.medicare"></span></p>
+                            <p class="pt-2 border-t border-green-200">Net Pay: <span class="font-bold text-lg" x-text="'$' + result.netPay"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-800">Error</h3>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">Virginia Paycheck Calculator - How It Works</h2>
+            <div class="prose prose-sm text-gray-600 mb-4">
+                <p>Our Virginia paycheck calculator provides accurate estimates of your net take-home pay after accounting for all applicable taxes and deductions. Whether you're in Richmond, Virginia Beach, Norfolk, or anywhere else in the Commonwealth, this tool helps you understand exactly how much will be deducted from your paycheck.</p>
+            </div>
+            
+            <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Virginia Tax Information (2023):</h3>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li>• Virginia State Income Tax: Progressive rates from 2% to 5.75%</li>
+                    <li>• Local Taxes: Some Virginia counties and cities impose additional local income taxes</li>
+                    <li>• Social Security: 6.2% on income up to $160,200</li>
+                    <li>• Medicare: 1.45% on all income (2.35% over $200,000 for single filers)</li>
+                    <li>• Virginia Standard Deduction: $4,500 for single filers, $9,000 for married filing jointly</li>
+                </ul>
+            </div>
+            
+            <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">How to Use This Virginia Paycheck Calculator:</h3>
+                <ol class="list-decimal list-inside space-y-2 text-sm text-gray-600">
+                    <li>Enter your gross pay amount before any deductions</li>
+                    <li>Select your pay frequency (weekly, bi-weekly, etc.)</li>
+                    <li>Choose your federal filing status (affects tax brackets)</li>
+                    <li>Enter allowances for federal and Virginia state taxes</li>
+                    <li>Add any additional withholding if applicable</li>
+                    <li>Check the box if you need to account for local taxes (applies to some Virginia jurisdictions)</li>
+                </ol>
+            </div>
+
+            <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Understanding Virginia Paycheck Deductions</h3>
+                <div class="prose prose-sm text-gray-600">
+                    <p>Virginia residents face several types of paycheck deductions:</p>
+                    <p><strong>Federal Income Tax:</strong> Based on IRS tax brackets and your W-4 selections. The calculator accounts for your filing status and allowances.</p>
+                    <p><strong>Virginia State Tax:</strong> Virginia has progressive tax rates from 2% to 5.75%. The calculator uses current Virginia tax brackets and accounts for state allowances.</p>
+                    <p><strong>Local Taxes:</strong> Some Virginia localities impose additional taxes. For example, counties in Northern Virginia may have local taxes up to 1%.</p>
+                    <p><strong>FICA Taxes:</strong> Social Security (6.2%) and Medicare (1.45%) are automatically calculated.</p>
+                </div>
+            </div>
+        </article>
+    </div>
+</div>
+
+<script>
+    function paycheckCalculator() {
+        return {
+            grossPay: null,
+            payFrequency: 'biweekly',
+            federalFilingStatus: 'single',
+            federalAllowances: 0,
+            stateAllowances: 0,
+            additionalWithholding: 0,
+            includeLocalTax: false,
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                // Validate inputs
+                if (!this.grossPay || this.grossPay <= 0) {
+                    this.error = 'Please enter a valid gross pay amount';
+                    return;
+                }
+                
+                // Convert to annual if needed
+                let annualGross = parseFloat(this.grossPay);
+                
+                switch(this.payFrequency) {
+                    case 'weekly':
+                        annualGross *= 52;
+                        break;
+                    case 'biweekly':
+                        annualGross *= 26;
+                        break;
+                    case 'semimonthly':
+                        annualGross *= 24;
+                        break;
+                    case 'monthly':
+                        annualGross *= 12;
+                        break;
+                    // annual is already annual
+                }
+                
+                // Calculate federal tax (simplified)
+                let federalTax = 0;
+                if (annualGross > 0) {
+                    // Simplified tax calculation - in a real app you'd use IRS tables
+                    const standardDeduction = this.federalFilingStatus === 'single' ? 13850 : 
+                                           this.federalFilingStatus === 'married' ? 27700 : 20800;
+                    const taxableIncome = Math.max(0, annualGross - standardDeduction - (this.federalAllowances * 4300));
+                    
+                    // Progressive tax brackets (2023)
+                    if (taxableIncome > 0) {
+                        const brackets = this.federalFilingStatus === 'single' ? 
+                            [[0, 10275, 0.10], [10275, 41775, 0.12], [41775, 89075, 0.22], 
+                             [89075, 170050, 0.24], [170050, 215950, 0.32], 
+                             [215950, 539900, 0.35], [539900, Infinity, 0.37]] :
+                            [[0, 20550, 0.10], [20550, 83550, 0.12], [83550, 178150, 0.22], 
+                             [178150, 340100, 0.24], [340100, 431900, 0.32], 
+                             [431900, 647850, 0.35], [647850, Infinity, 0.37]];
+                        
+                        for (const [min, max, rate] of brackets) {
+                            if (taxableIncome > min) {
+                                federalTax += (Math.min(taxableIncome, max) - min) * rate;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                // Calculate Virginia state tax (2023 rates)
+                let stateTax = 0;
+                if (annualGross > 0) {
+                    // Virginia has progressive tax rates
+                    const vaBrackets = [[0, 3000, 0.02], [3000, 5000, 0.03], 
+                                       [5000, 17000, 0.05], [17000, Infinity, 0.0575]];
+                    const vaTaxable = Math.max(0, annualGross - (this.stateAllowances * 930));
+                    
+                    for (const [min, max, rate] of vaBrackets) {
+                        if (vaTaxable > min) {
+                            stateTax += (Math.min(vaTaxable, max) - min) * rate;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                
+                // Calculate local tax (simplified as 1% if selected)
+                const localTax = this.includeLocalTax ? annualGross * 0.01 : 0;
+                
+                // Calculate FICA taxes
+                const socialSecurity = Math.min(annualGross, 160200) * 0.062;
+                const medicare = annualGross * (annualGross > (this.federalFilingStatus === 'single' ? 200000 : 250000) ? 0.0235 : 0.0145);
+                
+                // Add additional withholding
+                const additionalWithholdingAnnual = parseFloat(this.additionalWithholding) || 0;
+                switch(this.payFrequency) {
+                    case 'weekly':
+                        additionalWithholdingAnnual *= 52;
+                        break;
+                    case 'biweekly':
+                        additionalWithholdingAnnual *= 26;
+                        break;
+                    case 'semimonthly':
+                        additionalWithholdingAnnual *= 24;
+                        break;
+                    case 'monthly':
+                        additionalWithholdingAnnual *= 12;
+                        break;
+                    // annual is already annual
+                }
+                
+                // Calculate net pay
+                const totalDeductions = federalTax + stateTax + localTax + socialSecurity + medicare + additionalWithholdingAnnual;
+                const netPay = annualGross - totalDeductions;
+                
+                // Convert back to pay period
+                let divisor = 1;
+                switch(this.payFrequency) {
+                    case 'weekly':
+                        divisor = 52;
+                        break;
+                    case 'biweekly':
+                        divisor = 26;
+                        break;
+                    case 'semimonthly':
+                        divisor = 24;
+                        break;
+                    case 'monthly':
+                        divisor = 12;
+                        break;
+                    // annual is already annual
+                }
+                
+                this.result = {
+                    grossPay: (annualGross / divisor).toFixed(2),
+                    federalTax: (federalTax / divisor).toFixed(2),
+                    stateTax: (stateTax / divisor).toFixed(2),
+                    localTax: (localTax / divisor).toFixed(2),
+                    socialSecurity: (socialSecurity / divisor).toFixed(2),
+                    medicare: (medicare / divisor).toFixed(2),
+                    netPay: (netPay / divisor).toFixed(2)
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

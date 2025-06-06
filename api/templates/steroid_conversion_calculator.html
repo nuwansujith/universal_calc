@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Steroid Conversion Calculator | Accurate Glucocorticoid Dose Equivalents{% endblock %}
+
+{% block meta_description %}Calculate equivalent doses between prednisone, methylprednisolone, dexamethasone, hydrocortisone and other steroids with our precise conversion tool. Understand relative potencies and dosing frequencies.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Steroid Conversion Calculator</h1>
+        
+        <div x-data="steroidCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="dose" class="block text-sm font-medium text-gray-700 mb-1">Dose (mg)</label>
+                    <input x-model="dose" type="number" id="dose" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g., 10">
+                </div>
+                <div>
+                    <label for="currentSteroid" class="block text-sm font-medium text-gray-700 mb-1">From Steroid</label>
+                    <select x-model="currentSteroid" id="currentSteroid" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="prednisone">Prednisone</option>
+                        <option value="methylprednisolone">Methylprednisolone (Medrol)</option>
+                        <option value="dexamethasone">Dexamethasone</option>
+                        <option value="hydrocortisone">Hydrocortisone (Cortisol)</option>
+                        <option value="cortisone">Cortisone</option>
+                        <option value="prednisolone">Prednisolone</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="targetSteroid" class="block text-sm font-medium text-gray-700 mb-1">To Steroid</label>
+                    <select x-model="targetSteroid" id="targetSteroid" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="prednisone">Prednisone</option>
+                        <option value="methylprednisolone">Methylprednisolone (Medrol)</option>
+                        <option value="dexamethasone">Dexamethasone</option>
+                        <option value="hydrocortisone">Hydrocortisone (Cortisol)</option>
+                        <option value="cortisone">Cortisone</option>
+                        <option value="prednisolone">Prednisolone</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="frequency" class="block text-sm font-medium text-gray-700 mb-1">Frequency (per day)</label>
+                    <input x-model="frequency" type="number" id="frequency" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g., 1" value="1">
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Convert Steroid Dose
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Conversion Result</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p><span x-text="dose"></span> mg <span x-text="currentSteroid"></span> = <span class="font-bold" x-text="result.convertedDose"></span> mg <span x-text="targetSteroid"></span></p>
+                            <p x-show="frequency > 1">Daily total: <span class="font-bold" x-text="result.dailyDose"></span> mg/day</p>
+                            <p class="text-sm text-green-600" x-text="result.note"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-red-800">Error</h2>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <h2 class="text-xl font-semibold text-dark mb-4">About Steroid Dose Conversions</h2>
+        <p class="text-gray-600 mb-4">Our steroid conversion calculator provides clinically-relevant equivalent doses between different glucocorticoids based on their relative anti-inflammatory potency. This tool helps healthcare professionals and patients understand how to safely switch between prednisone, hydrocortisone, dexamethasone, and other corticosteroids while maintaining equivalent therapeutic effects.</p>
+        
+        <h3 class="font-medium text-gray-700 mb-2">Glucocorticoid Equivalent Dose Chart</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Steroid</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Equivalent Dose (mg)</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Relative Potency</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration of Action</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-4 py-2 text-sm text-gray-600">Hydrocortisone (Cortisol)</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">20</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">1</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">8-12 hours</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 text-sm text-gray-600">Cortisone</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">25</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">0.8</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">8-12 hours</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 text-sm text-gray-600">Prednisone</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">5</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">4</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">12-36 hours</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 text-sm text-gray-600">Prednisolone</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">5</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">4</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">12-36 hours</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 text-sm text-gray-600">Methylprednisolone (Medrol)</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">4</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">5</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">12-36 hours</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 text-sm text-gray-600">Dexamethasone</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">0.75</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">30</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">36-72 hours</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">Clinical Considerations for Steroid Conversion:</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+                <li>• <strong>Potency varies</strong> - Anti-inflammatory effects differ from mineralocorticoid activity</li>
+                <li>• <strong>Duration matters</strong> - Dexamethasone lasts longer than hydrocortisone despite equivalent anti-inflammatory doses</li>
+                <li>• <strong>Conversion nuances</strong> - Prednisone requires hepatic conversion to prednisolone for activity</li>
+                <li>• <strong>Adrenal suppression</strong> - Higher potency steroids cause more HPA axis suppression</li>
+                <li>• <strong>Dosing schedules</strong> - Hydrocortisone often requires 2-3 daily doses due to short duration</li>
+                <li>• <strong>Patient factors</strong> - Hepatic/renal function, age, and comorbidities affect steroid metabolism</li>
+            </ul>
+        </div>
+
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h3 class="font-medium text-blue-700 mb-2">Frequently Asked Questions</h3>
+            <div class="space-y-4">
+                <div>
+                    <h4 class="font-medium text-gray-700">How do you convert 10mg prednisone to hydrocortisone?</h4>
+                    <p class="text-sm text-gray-600 mt-1">Using our steroid conversion calculator, 10mg prednisone equals approximately 40mg hydrocortisone. This is because prednisone is 4 times more potent than hydrocortisone (20mg hydrocortisone = 5mg prednisone).</p>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-700">What is 4mg methylprednisolone equivalent to in dexamethasone?</h4>
+                    <p class="text-sm text-gray-600 mt-1">4mg methylprednisolone converts to about 0.6mg dexamethasone. Methylprednisolone is 5 times more potent than hydrocortisone, while dexamethasone is 30 times more potent.</p>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-700">Why are steroid conversions important?</h4>
+                    <p class="text-sm text-gray-600 mt-1">Accurate steroid conversions prevent under- or over-dosing when switching medications. Improper conversions can lead to adrenal insufficiency or Cushingoid side effects.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function steroidCalculator() {
+        return {
+            dose: null,
+            currentSteroid: 'prednisone',
+            targetSteroid: 'methylprednisolone',
+            frequency: 1,
+            result: null,
+            error: null,
+            
+            // Relative potency compared to hydrocortisone (20mg)
+            steroidPotency: {
+                'hydrocortisone': 1,
+                'cortisone': 0.8,
+                'prednisone': 4,
+                'prednisolone': 4,
+                'methylprednisolone': 5,
+                'dexamethasone': 30
+            },
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                if (!this.dose || this.dose <= 0) {
+                    this.error = 'Please enter a valid dose greater than zero';
+                    return;
+                }
+                
+                if (!this.frequency || this.frequency <= 0) {
+                    this.error = 'Please enter a valid frequency greater than zero';
+                    return;
+                }
+                
+                if (this.currentSteroid === this.targetSteroid) {
+                    this.error = 'Source and target steroids are the same';
+                    return;
+                }
+                
+                // Convert to hydrocortisone equivalent first
+                const hydrocortisoneEquivalent = this.dose * (20 / (this.steroidPotency[this.currentSteroid] * 5));
+                
+                // Then convert to target steroid
+                const convertedDose = hydrocortisoneEquivalent / (20 / (this.steroidPotency[this.targetSteroid] * 5));
+                
+                // Calculate daily dose if frequency > 1
+                const dailyDose = convertedDose * this.frequency;
+                
+                // Add clinical note
+                let note = '';
+                if (this.targetSteroid === 'dexamethasone' && convertedDose < 1) {
+                    note = 'Note: Dexamethasone is typically dosed in 0.5-1mg increments';
+                } else if (this.targetSteroid === 'hydrocortisone' && convertedDose > 40) {
+                    note = 'Note: High hydrocortisone doses are often divided 2-3 times daily';
+                } else if (this.currentSteroid === 'prednisone') {
+                    note = 'Note: Prednisone requires conversion to prednisolone in the liver for activity';
+                }
+                
+                this.result = {
+                    convertedDose: convertedDose.toFixed(2),
+                    dailyDose: dailyDose.toFixed(2),
+                    note: note
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

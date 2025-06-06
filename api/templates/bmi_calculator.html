@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}BMI Calculator - Calculate Your Body Mass Index Accurately{% endblock %}
+
+{% block meta_description %}Free online BMI calculator tool that measures body fat based on height and weight. Get instant BMI results with category analysis and health risk assessment for adults.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">BMI Calculator - Body Mass Index Tool</h1>
+        
+        <div x-data="bmiCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="height" class="block text-sm font-medium text-gray-700 mb-1">Height</label>
+                    <div class="flex">
+                        <input x-model="heightFeet" type="number" id="heightFeet" class="w-1/2 px-4 py-2 border border-gray-300 rounded-l-md focus:ring-primary focus:border-primary" placeholder="Feet" min="0">
+                        <input x-model="heightInches" type="number" id="heightInches" class="w-1/2 px-4 py-2 border border-gray-300 rounded-r-md focus:ring-primary focus:border-primary" placeholder="Inches" min="0" max="11">
+                    </div>
+                </div>
+                <div>
+                    <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">Weight</label>
+                    <input x-model="weight" type="number" id="weight" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="Pounds" min="0">
+                </div>
+            </div>
+
+            <div class="flex items-center">
+                <input x-model="useMetric" type="checkbox" id="useMetric" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                <label for="useMetric" class="ml-2 block text-sm text-gray-700">Use Metric Units (cm/kg)</label>
+            </div>
+
+            <div x-show="useMetric" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="heightCm" class="block text-sm font-medium text-gray-700 mb-1">Height (cm)</label>
+                    <input x-model="heightCm" type="number" id="heightCm" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="Centimeters" min="0">
+                </div>
+                <div>
+                    <label for="weightKg" class="block text-sm font-medium text-gray-700 mb-1">Weight (kg)</label>
+                    <input x-model="weightKg" type="number" id="weightKg" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="Kilograms" min="0">
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate BMI
+            </button>
+
+            <div x-show="result !== null" x-transition class="border rounded-md p-4" :class="result.colorClass">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5" :class="result.iconColor" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium" :class="result.textColor">Your BMI: <span class="font-bold" x-text="result.bmi"></span></h2>
+                        <div class="mt-1 space-y-1" :class="result.textColor">
+                            <p>Category: <span class="font-bold" x-text="result.category"></span></p>
+                            <p x-show="result.healthyRange">Healthy range: <span x-text="result.healthyRange"></span></p>
+                            <p class="text-sm" x-text="result.message"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-red-800">Error</h2>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <h2 class="text-xl font-semibold text-dark mb-4">About Body Mass Index (BMI)</h2>
+        <p class="text-gray-600 mb-4">BMI (Body Mass Index) is a widely used screening tool that measures body fat based on height and weight for adult men and women. Developed in the 19th century by Adolphe Quetelet, BMI provides a simple numeric measure that helps healthcare professionals assess weight categories that may lead to health problems.</p>
+        
+        <h3 class="font-medium text-gray-700 mb-2">BMI Categories and Health Risks:</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BMI Range</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Weight Category</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Health Risk Assessment</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-4 py-2 text-sm text-gray-600">Below 18.5</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">Underweight</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">Possible nutritional deficiency and osteoporosis risk</td>
+                    </tr>
+                    <tr class="bg-green-50">
+                        <td class="px-4 py-2 text-sm text-gray-600">18.5 - 24.9</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">Normal weight</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">Lowest risk for weight-related health problems</td>
+                    </tr>
+                    <tr class="bg-yellow-50">
+                        <td class="px-4 py-2 text-sm text-gray-600">25.0 - 29.9</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">Overweight</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">Increased risk for type 2 diabetes, hypertension</td>
+                    </tr>
+                    <tr class="bg-orange-50">
+                        <td class="px-4 py-2 text-sm text-gray-600">30.0 - 34.9</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">Obese (Class I)</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">High risk for heart disease, stroke, certain cancers</td>
+                    </tr>
+                    <tr class="bg-red-50">
+                        <td class="px-4 py-2 text-sm text-gray-600">35.0 - 39.9</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">Obese (Class II)</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">Very high risk for severe health complications</td>
+                    </tr>
+                    <tr class="bg-red-100">
+                        <td class="px-4 py-2 text-sm text-gray-600">40.0 and above</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">Extreme Obesity (Class III)</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">Extremely high risk for life-threatening conditions</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">Understanding BMI Limitations:</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+                <li>• BMI is a screening tool but not a diagnostic of body fatness or overall health status</li>
+                <li>• Athletes and muscular individuals may have high BMI without excess fat</li>
+                <li>• Older adults may have more body fat than younger adults with identical BMI</li>
+                <li>• BMI doesn't account for muscle mass, bone density, or fat distribution patterns</li>
+                <li>• Ethnic differences may affect BMI interpretation (e.g., Asian populations may have higher health risks at lower BMI)</li>
+                <li>• BMI may underestimate health risks in people with "normal" weight but high body fat percentage</li>
+                <li>• Always consult a healthcare provider for comprehensive health assessment and personalized advice</li>
+            </ul>
+        </div>
+
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h3 class="font-medium text-blue-700 mb-2">How to Maintain a Healthy BMI:</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+                <li>• Engage in regular physical activity (150+ minutes moderate exercise weekly)</li>
+                <li>• Follow a balanced diet rich in fruits, vegetables, and whole grains</li>
+                <li>• Monitor portion sizes and practice mindful eating</li>
+                <li>• Get adequate sleep (7-9 hours per night for adults)</li>
+                <li>• Manage stress through relaxation techniques</li>
+                <li>• Limit processed foods and sugary beverages</li>
+                <li>• Schedule regular health check-ups with your doctor</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    function bmiCalculator() {
+        return {
+            heightFeet: null,
+            heightInches: null,
+            weight: null,
+            heightCm: null,
+            weightKg: null,
+            useMetric: false,
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                if (this.useMetric) {
+                    if (!this.heightCm || !this.weightKg) {
+                        this.error = 'Please enter both height and weight';
+                        return;
+                    }
+                    
+                    if (this.heightCm <= 0 || this.weightKg <= 0) {
+                        this.error = 'Height and weight must be greater than zero';
+                        return;
+                    }
+                    
+                    // Calculate BMI in metric units
+                    const heightM = this.heightCm / 100;
+                    const bmi = this.weightKg / (heightM * heightM);
+                    this.displayResult(bmi);
+                } else {
+                    if (!this.heightFeet && !this.heightInches) {
+                        this.error = 'Please enter height';
+                        return;
+                    }
+                    
+                    if (!this.weight) {
+                        this.error = 'Please enter weight';
+                        return;
+                    }
+                    
+                    if ((this.heightFeet <= 0 && this.heightInches <= 0) || this.weight <= 0) {
+                        this.error = 'Height and weight must be greater than zero';
+                        return;
+                    }
+                    
+                    // Calculate BMI in imperial units
+                    const totalInches = (this.heightFeet * 12) + (this.heightInches || 0);
+                    const bmi = (this.weight / (totalInches * totalInches)) * 703;
+                    this.displayResult(bmi);
+                }
+            },
+            
+            displayResult(bmi) {
+                let category, colorClass, iconColor, textColor, message, healthyRange;
+                
+                if (bmi < 18.5) {
+                    category = "Underweight";
+                    colorClass = "bg-blue-50 border-blue-200";
+                    iconColor = "text-blue-600";
+                    textColor = "text-blue-800";
+                    message = "You may be underweight. Consider consulting a healthcare provider.";
+                    healthyRange = "18.5 - 24.9";
+                } else if (bmi >= 18.5 && bmi <= 24.9) {
+                    category = "Normal weight";
+                    colorClass = "bg-green-50 border-green-200";
+                    iconColor = "text-green-600";
+                    textColor = "text-green-800";
+                    message = "Your weight is in the healthy range for your height.";
+                } else if (bmi >= 25 && bmi <= 29.9) {
+                    category = "Overweight";
+                    colorClass = "bg-yellow-50 border-yellow-200";
+                    iconColor = "text-yellow-600";
+                    textColor = "text-yellow-800";
+                    message = "You may be overweight. Consider lifestyle changes.";
+                    healthyRange = "18.5 - 24.9";
+                } else if (bmi >= 30 && bmi <= 34.9) {
+                    category = "Obese (Class I)";
+                    colorClass = "bg-orange-50 border-orange-200";
+                    iconColor = "text-orange-600";
+                    textColor = "text-orange-800";
+                    message = "This indicates obesity. Consult a healthcare provider.";
+                    healthyRange = "18.5 - 24.9";
+                } else if (bmi >= 35 && bmi <= 39.9) {
+                    category = "Obese (Class II)";
+                    colorClass = "bg-red-50 border-red-200";
+                    iconColor = "text-red-600";
+                    textColor = "text-red-800";
+                    message = "This indicates severe obesity. Medical advice is recommended.";
+                    healthyRange = "18.5 - 24.9";
+                } else {
+                    category = "Extreme Obesity (Class III)";
+                    colorClass = "bg-red-100 border-red-300";
+                    iconColor = "text-red-700";
+                    textColor = "text-red-900";
+                    message = "This indicates extreme obesity. Seek medical attention.";
+                    healthyRange = "18.5 - 24.9";
+                }
+                
+                this.result = {
+                    bmi: bmi.toFixed(1),
+                    category: category,
+                    colorClass: colorClass,
+                    iconColor: iconColor,
+                    textColor: textColor,
+                    message: message,
+                    healthyRange: healthyRange
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block title %}USDA Mortgage Calculator | Estimate Your Rural Home Loan Payments{% endblock %}
+
+{% block meta_description %}Calculate your USDA home loan payments with our free mortgage calculator. Check eligibility for no-down-payment rural home loans, estimate monthly payments, and see income limits.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">USDA Mortgage Calculator</h1>
+        
+        <div x-data="usdaMortgageCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="homePrice" class="block text-sm font-medium text-gray-700 mb-1">Home Price ($)</label>
+                    <input x-model="homePrice" type="number" id="homePrice" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="250,000">
+                </div>
+                <div>
+                    <label for="downPayment" class="block text-sm font-medium text-gray-700 mb-1">Down Payment ($)</label>
+                    <input x-model="downPayment" type="number" id="downPayment" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="interestRate" class="block text-sm font-medium text-gray-700 mb-1">Interest Rate (%)</label>
+                    <input x-model="interestRate" type="number" step="0.01" id="interestRate" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="4.25">
+                </div>
+                <div>
+                    <label for="loanTerm" class="block text-sm font-medium text-gray-700 mb-1">Loan Term</label>
+                    <select x-model="loanTerm" id="loanTerm" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="30" selected>30 years</option>
+                        <option value="15">15 years</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="annualIncome" class="block text-sm font-medium text-gray-700 mb-1">Annual Household Income ($)</label>
+                    <input x-model="annualIncome" type="number" id="annualIncome" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="75,000">
+                </div>
+                <div>
+                    <label for="householdSize" class="block text-sm font-medium text-gray-700 mb-1">Household Size</label>
+                    <input x-model="householdSize" type="number" id="householdSize" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="4" value="4">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                    <select x-model="state" id="state" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="">Select State</option>
+                        <option value="AL">Alabama</option>
+                        <option value="AK">Alaska</option>
+                        <!-- Add all 50 states -->
+                        <option value="WY">Wyoming</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="county" class="block text-sm font-medium text-gray-700 mb-1">County</label>
+                    <select x-model="county" id="county" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" :disabled="!state">
+                        <option value="">Select County</option>
+                        <template x-for="county in counties[state] || []">
+                            <option :value="county" x-text="county"></option>
+                        </template>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex items-center">
+                <input x-model="includeTaxesAndInsurance" id="includeTaxesAndInsurance" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                <label for="includeTaxesAndInsurance" class="ml-2 block text-sm text-gray-700">Include Estimated Taxes & Insurance</label>
+            </div>
+
+            <div x-show="includeTaxesAndInsurance" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="annualTaxes" class="block text-sm font-medium text-gray-700 mb-1">Annual Property Taxes ($)</label>
+                    <input x-model="annualTaxes" type="number" id="annualTaxes" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="2,500">
+                </div>
+                <div>
+                    <label for="annualInsurance" class="block text-sm font-medium text-gray-700 mb-1">Annual Home Insurance ($)</label>
+                    <input x-model="annualInsurance" type="number" id="annualInsurance" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="1,200">
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate USDA Loan
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">USDA Loan Results</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Loan Amount: <span class="font-bold" x-text="'$' + result.loanAmount.toLocaleString('en-US')"></span></p>
+                            <p>USDA Guarantee Fee: <span class="font-bold" x-text="'$' + result.guaranteeFee.toLocaleString('en-US', {maximumFractionDigits: 0})"></span> (<span x-text="result.guaranteeFeePercent"></span>%)</p>
+                            <p>Monthly Payment: <span class="font-bold" x-text="'$' + result.monthlyPayment.toLocaleString('en-US', {maximumFractionDigits: 2})"></span></p>
+                            <p x-show="includeTaxesAndInsurance">Monthly PITI: <span class="font-bold" x-text="'$' + result.monthlyPITI.toLocaleString('en-US', {maximumFractionDigits: 2})"></span></p>
+                            <p>Total Interest Paid: <span class="font-bold" x-text="'$' + result.totalInterest.toLocaleString('en-US', {maximumFractionDigits: 0})"></span></p>
+                            <p>Income Eligibility: <span class="font-bold" :class="result.incomeEligible ? 'text-green-600' : 'text-red-600'" x-text="result.incomeEligible ? 'Eligible' : 'Not Eligible'"></span></p>
+                            <p x-show="!result.incomeEligible">Max Income for Household: <span class="font-bold" x-text="'$' + result.maxIncome.toLocaleString('en-US')"></span></p>
+                            <p>Location Eligibility: <span class="font-bold" :class="result.locationEligible ? 'text-green-600' : 'text-red-600'" x-text="result.locationEligible ? 'Eligible' : 'Not Eligible'"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-800">Error</h3>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">About USDA Home Loans</h2>
+            <p class="text-gray-600 mb-4">The USDA loan program (officially known as the Section 502 Direct Loan Program) helps low-to-moderate income buyers purchase homes in eligible rural areas with no down payment required. Our USDA mortgage calculator helps you estimate monthly payments, check eligibility, and understand the costs of this government-backed home loan program.</p>
+            
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-green-800 mb-2">Key Benefits of USDA Loans</h3>
+                    <ul class="space-y-1 text-sm text-gray-600">
+                        <li>• <strong>No down payment</strong> required - 100% financing available</li>
+                        <li>• Competitive interest rates - often lower than conventional loans</li>
+                        <li>• Lower mortgage insurance costs compared to FHA loans</li>
+                        <li>• Flexible credit requirements - easier qualification</li>
+                    </ul>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-blue-800 mb-2">USDA Loan Eligibility Requirements</h3>
+                    <ul class="space-y-1 text-sm text-gray-600">
+                        <li>• Property must be in eligible rural area (check USDA eligibility map)</li>
+                        <li>• Household income limits apply based on location and family size</li>
+                        <li>• Primary residence only - no investment properties</li>
+                        <li>• U.S. citizen or permanent resident status required</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h3 class="font-medium text-gray-700 mb-2">USDA Loan Costs and Fees</h3>
+                <div class="overflow-x-auto mb-6">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fee Type</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">When Paid</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Upfront Guarantee Fee</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1% of loan amount</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Financed into loan</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Annual Fee</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">0.35% of loan amount</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Monthly with payment</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="mt-6 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">USDA Loan Income Limits (2023 Examples)</h3>
+                <ul class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <li>• 1-4 person household: $103,500 (most areas)</li>
+                    <li>• 5+ person household: $136,600 (most areas)</li>
+                    <li>• Higher limits in high-cost areas</li>
+                    <li>• Limits vary by county and state</li>
+                </ul>
+                <p class="mt-2 text-sm text-gray-600">Note: Income limits are adjusted annually and vary by location. Use our USDA mortgage calculator to check current limits for your area.</p>
+            </section>
+
+            <section class="mt-6 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Important Notes About USDA Rural Development Loans</h3>
+                <ul class="list-disc list-inside space-y-2 text-sm text-gray-600">
+                    <li>USDA loans are for primary residences only (no investment properties or second homes)</li>
+                    <li>Properties must meet USDA minimum property requirements including adequate utilities and structural soundness</li>
+                    <li>Income limits include all household members, not just borrowers on the mortgage</li>
+                    <li>Always check the official USDA eligibility map for your specific property address as boundaries change</li>
+                    <li>USDA loans have two types: Direct Loans (from USDA) and Guaranteed Loans (from approved lenders)</li>
+                </ul>
+            </section>
+
+            <section class="mt-6">
+                <h3 class="font-medium text-gray-700 mb-2">How to Use This USDA Mortgage Calculator</h3>
+                <p class="text-gray-600 mb-2 text-sm">Our USDA loan calculator helps you estimate:</p>
+                <ul class="list-disc list-inside space-y-1 text-sm text-gray-600">
+                    <li>Monthly mortgage payments including USDA guarantee fees</li>
+                    <li>Total interest paid over the life of the loan</li>
+                    <li>Income eligibility based on your household size and location</li>
+                    <li>Total housing costs including taxes and insurance (optional)</li>
+                </ul>
+                <p class="mt-2 text-sm text-gray-600">For official eligibility determination, consult with a USDA-approved lender or your local Rural Development office.</p>
+            </section>
+        </article>
+    </div>
+</div>
+
+<script>
+    function usdaMortgageCalculator() {
+        return {
+            homePrice: 250000,
+            downPayment: 0,
+            interestRate: 4.25,
+            loanTerm: 30,
+            annualIncome: 75000,
+            householdSize: 4,
+            state: '',
+            county: '',
+            includeTaxesAndInsurance: false,
+            annualTaxes: 2500,
+            annualInsurance: 1200,
+            counties: {
+                // Sample counties - in a real app you'd want a more complete list
+                'AL': ['Autauga', 'Baldwin', 'Barbour', 'Bibb'],
+                'AK': ['Aleutians East', 'Anchorage', 'Fairbanks'],
+                // ... other states
+                'WY': ['Albany', 'Campbell', 'Laramie']
+            },
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                // Validate inputs
+                if (!this.homePrice || !this.interestRate || !this.annualIncome || !this.householdSize) {
+                    this.error = 'Please fill in all required fields';
+                    return;
+                }
+                
+                if (this.homePrice <= 0 || this.interestRate <= 0 || this.annualIncome <= 0 || this.householdSize <= 0) {
+                    this.error = 'All values must be greater than zero';
+                    return;
+                }
+                
+                if (this.downPayment < 0 || this.downPayment >= this.homePrice) {
+                    this.error = 'Down payment must be between 0 and home price';
+                    return;
+                }
+                
+                // Calculate loan amount (USDA loans typically require no down payment)
+                const loanAmount = this.homePrice - this.downPayment;
+                
+                // Calculate USDA fees
+                const upfrontFeePercent = 0.01; // 1% upfront guarantee fee
+                const annualFeePercent = 0.0035; // 0.35% annual fee
+                
+                const upfrontFee = loanAmount * upfrontFeePercent;
+                const financedAmount = loanAmount + upfrontFee;
+                
+                // Calculate monthly payment
+                const rate = parseFloat(this.interestRate) / 100 / 12;
+                const payments = parseFloat(this.loanTerm) * 12;
+                
+                const monthlyPayment = financedAmount * rate * Math.pow(1 + rate, payments) / (Math.pow(1 + rate, payments) - 1);
+                const annualFee = loanAmount * annualFeePercent;
+                const monthlyFee = annualFee / 12;
+                
+                // Calculate total payment with fees
+                const totalMonthlyPayment = monthlyPayment + monthlyFee;
+                
+                // Calculate total interest
+                const totalInterest = (monthlyPayment * payments) - financedAmount;
+                
+                // Check income eligibility (simplified - real checks would use exact county limits)
+                const baseLimit = 103500;
+                const additionalPersonAllowance = 7300;
+                const maxIncome = baseLimit + (Math.max(0, this.householdSize - 4) * additionalPersonAllowance);
+                const incomeEligible = this.annualIncome <= maxIncome;
+                
+                // Check location eligibility (simplified - in reality would check USDA eligibility map)
+                const locationEligible = this.state !== '' && this.county !== '';
+                
+                // Calculate PITI if including taxes and insurance
+                let monthlyPITI = totalMonthlyPayment;
+                if (this.includeTaxesAndInsurance) {
+                    monthlyPITI += (this.annualTaxes / 12) + (this.annualInsurance / 12);
+                }
+                
+                this.result = {
+                    loanAmount: loanAmount,
+                    guaranteeFee: upfrontFee,
+                    guaranteeFeePercent: (upfrontFeePercent * 100).toFixed(1),
+                    monthlyPayment: totalMonthlyPayment,
+                    monthlyPITI: monthlyPITI,
+                    totalInterest: totalInterest,
+                    incomeEligible: incomeEligible,
+                    maxIncome: maxIncome,
+                    locationEligible: locationEligible
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

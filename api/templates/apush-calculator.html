@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}APUSH Score Calculator | Estimate Your AP US History Exam Score{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Calculate your AP US History exam score with our free APUSH score calculator. Estimate your multiple choice, SAQ, DBQ, and LEQ scores to predict your AP score (1-5).">
+<meta name="keywords" content="APUSH score calculator, AP US History calculator, AP exam score predictor, DBQ scorer, LEQ scorer, SAQ calculator, AP test score">
+<meta property="og:title" content="APUSH Score Calculator | Estimate Your AP US History Exam Score">
+<meta property="og:description" content="Free tool to calculate your AP US History exam score and predict your AP score (1-5) based on multiple choice, SAQ, DBQ and LEQ performance.">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto p-4">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">APUSH Score Calculator</h1>
+        <p class="text-gray-600 mb-4">Estimate your AP US History exam score based on the official College Board scoring guidelines</p>
+        
+        <div x-data="apushCalculator()" class="space-y-6">
+            <!-- Multiple Choice Section -->
+            <div class="bg-blue-50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-blue-800 mb-3">Multiple Choice (55 Questions)</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answers</label>
+                        <input x-model="mcCorrect" type="number" min="0" max="55" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="0-55">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Raw Score</label>
+                        <input x-model="mcRawScore" type="number" readonly class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Short Answer Questions -->
+            <div class="bg-green-50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-green-800 mb-3">Short Answer Questions (3 Questions)</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">SAQ 1 Score (0-3)</label>
+                        <input x-model="saq1" type="number" min="0" max="3" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">SAQ 2 Score (0-3)</label>
+                        <input x-model="saq2" type="number" min="0" max="3" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">SAQ 3/4 Score (0-3)</label>
+                        <input x-model="saq3" type="number" min="0" max="3" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">SAQ Raw Score</label>
+                        <input x-model="saqRawScore" type="number" readonly class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document-Based Question -->
+            <div class="bg-purple-50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-purple-800 mb-3">Document-Based Question (DBQ)</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">DBQ Score (0-7)</label>
+                        <input x-model="dbqScore" type="number" min="0" max="7" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">DBQ Raw Score</label>
+                        <input x-model="dbqRawScore" type="number" readonly class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Long Essay Question -->
+            <div class="bg-yellow-50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-yellow-800 mb-3">Long Essay Question (LEQ)</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">LEQ Score (0-6)</label>
+                        <input x-model="leqScore" type="number" min="0" max="6" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">LEQ Raw Score</label>
+                        <input x-model="leqRawScore" type="number" readonly class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calculate Button -->
+            <button @click="calculateScore()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate APUSH Score
+            </button>
+
+            <!-- Results -->
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-green-800">APUSH Score Result</h3>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Composite Score: <span class="font-bold" x-text="result.compositeScore"></span>/130</p>
+                            <p>Predicted AP Score: <span class="font-bold" x-text="result.apScore"></span>/5</p>
+                            <p class="text-sm italic" x-text="result.scoreDescription"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">How the APUSH Score is Calculated</h2>
+        <p class="text-gray-600 mb-4">This calculator estimates your AP U.S. History exam score based on the official scoring guidelines from the College Board:</p>
+        <ul class="list-disc list-inside space-y-2 text-gray-600">
+            <li><strong>Multiple Choice:</strong> 1 point per correct answer (55 questions, 40% of total score)</li>
+            <li><strong>Short Answer:</strong> 3 points per question (3 questions, 20% of total score)</li>
+            <li><strong>DBQ:</strong> 7 points maximum (includes thesis, document analysis, contextualization, 25% of total score)</li>
+            <li><strong>LEQ:</strong> 6 points maximum (includes thesis, evidence, analysis, 15% of total score)</li>
+            <li>The composite score is converted to the 1-5 AP scale using College Board standards</li>
+        </ul>
+        <div class="mt-6">
+            <h3 class="font-semibold text-gray-800 mb-2">AP US History Score Distribution</h3>
+            <p class="text-gray-600 mb-2">Typical score ranges based on previous years:</p>
+            <ul class="list-disc list-inside space-y-1 text-gray-600">
+                <li><strong>5:</strong> 100-130 points (top 10-15% of students)</li>
+                <li><strong>4:</strong> 80-99 points (next 15-20% of students)</li>
+                <li><strong>3:</strong> 60-79 points (next 25-30% of students)</li>
+                <li><strong>2:</strong> 40-59 points</li>
+                <li><strong>1:</strong> 0-39 points</li>
+            </ul>
+        </div>
+        <p class="mt-4 text-sm text-gray-500">Note: This is an estimation tool only. Official APUSH exam scores may vary slightly based on yearly curve adjustments by the College Board.</p>
+    </div>
+</div>
+
+<script>
+    function apushCalculator() {
+        return {
+            mcCorrect: 0,
+            saq1: 0,
+            saq2: 0,
+            saq3: 0,
+            dbqScore: 0,
+            leqScore: 0,
+            result: null,
+            
+            get mcRawScore() {
+                return this.mcCorrect || 0;
+            },
+            
+            get saqRawScore() {
+                return (parseInt(this.saq1) || 0) + (parseInt(this.saq2) || 0) + (parseInt(this.saq3) || 0);
+            },
+            
+            get dbqRawScore() {
+                return (parseInt(this.dbqScore) || 0) * 4.2857; // Weighted to match 30% of total
+            },
+            
+            get leqRawScore() {
+                return (parseInt(this.leqScore) || 0) * 3.3333; // Weighted to match 20% of total
+            },
+            
+            calculateScore() {
+                const compositeScore = Math.round(
+                    this.mcRawScore + 
+                    this.saqRawScore * 1.875 + // Weighted to match 20% of total
+                    this.dbqRawScore + 
+                    this.leqRawScore
+                );
+                
+                let apScore;
+                let scoreDescription;
+                
+                if (compositeScore >= 100) {
+                    apScore = 5;
+                    scoreDescription = "Extremely well qualified - Excellent chance of college credit";
+                } else if (compositeScore >= 80) {
+                    apScore = 4;
+                    scoreDescription = "Well qualified - Good chance of college credit";
+                } else if (compositeScore >= 60) {
+                    apScore = 3;
+                    scoreDescription = "Qualified - May qualify for college credit";
+                } else if (compositeScore >= 40) {
+                    apScore = 2;
+                    scoreDescription = "Possibly qualified - Unlikely to receive credit";
+                } else {
+                    apScore = 1;
+                    scoreDescription = "No recommendation - No credit awarded";
+                }
+                
+                this.result = {
+                    compositeScore: compositeScore,
+                    apScore: apScore,
+                    scoreDescription: scoreDescription
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

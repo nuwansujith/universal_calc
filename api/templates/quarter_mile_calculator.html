@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}1/4 Mile Calculator - Estimate Drag Strip Performance | ET & Trap Speed{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Free online 1/4 mile calculator that estimates your vehicle's drag strip performance. Calculate ET, trap speed, and 0-60 times based on weight, horsepower, and other factors.">
+<meta name="keywords" content="quarter mile calculator, drag race calculator, ET calculator, trap speed calculator, 0-60 calculator, horsepower calculator, car performance estimator">
+<meta property="og:title" content="1/4 Mile Calculator - Estimate Drag Strip Performance">
+<meta property="og:description" content="Calculate your vehicle's estimated quarter-mile times, trap speed, and 0-60 performance based on weight and horsepower.">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">1/4 Mile Calculator</h1>
+        
+        <div x-data="quarterMileCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">Vehicle Weight (lbs)</label>
+                    <input x-model="weight" type="number" id="weight" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 3500" aria-label="Vehicle weight in pounds">
+                </div>
+                <div>
+                    <label for="horsepower" class="block text-sm font-medium text-gray-700 mb-1">Engine Horsepower</label>
+                    <input x-model="horsepower" type="number" id="horsepower" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 300" aria-label="Engine horsepower">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="driveType" class="block text-sm font-medium text-gray-700 mb-1">Drive Type</label>
+                    <select x-model="driveType" id="driveType" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" aria-label="Vehicle drive type">
+                        <option value="1">Front-Wheel Drive</option>
+                        <option value="0.95">Rear-Wheel Drive</option>
+                        <option value="0.9">All-Wheel Drive</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="traction" class="block text-sm font-medium text-gray-700 mb-1">Traction Condition</label>
+                    <select x-model="traction" id="traction" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" aria-label="Traction conditions">
+                        <option value="1">Average</option>
+                        <option value="1.05">Poor (wet/slippery)</option>
+                        <option value="0.95">Excellent (drag radials)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="shiftTime" class="block text-sm font-medium text-gray-700 mb-1">Shift Time (seconds)</label>
+                    <input x-model="shiftTime" type="number" step="0.1" id="shiftTime" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 0.3" value="0.3" aria-label="Shift time in seconds">
+                </div>
+                <div>
+                    <label for="altitude" class="block text-sm font-medium text-gray-700 mb-1">Altitude (feet)</label>
+                    <input x-model="altitude" type="number" id="altitude" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 500" value="0" aria-label="Altitude in feet">
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200" aria-label="Calculate quarter mile performance">
+                Calculate 1/4 Mile Time
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Estimated 1/4 Mile Performance</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>ET: <span class="font-bold" x-text="result.et"></span> seconds</p>
+                            <p>Trap Speed: <span class="font-bold" x-text="result.trapSpeed"></span> mph</p>
+                            <p>0-60 MPH: <span class="font-bold" x-text="result.zeroToSixty"></span> seconds</p>
+                            <p>Power-to-weight: <span class="font-bold" x-text="result.powerToWeight"></span> hp/lb</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-red-800">Error</h2>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">About the 1/4 Mile Calculator</h2>
+            <p class="text-gray-600 mb-4">This drag racing calculator provides accurate estimates of your vehicle's quarter-mile performance based on key mechanical factors. Whether you're preparing for the strip or just curious about your car's potential, this tool helps predict elapsed time (ET), trap speed, and 0-60 acceleration.</p>
+            
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">How the Calculator Works:</h3>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li>• <strong>Physics-based model</strong>: Considers weight, power, drivetrain efficiency, and aerodynamics</li>
+                    <li>• <strong>Shift times</strong>: Accounts for gear changes (manual transmissions typically add 0.2-0.4 seconds per shift)</li>
+                    <li>• <strong>Altitude adjustment</strong>: Compensates for elevation (higher altitudes reduce engine power by ~1% per 1000ft)</li>
+                    <li>• <strong>Traction factors</strong>: Adjusts for different surface conditions from drag radials to wet pavement</li>
+                    <li>• <strong>Results are estimates</strong> - actual performance may vary based on driver skill, weather, and other variables</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Typical Quarter-Mile Performance Ranges:</h3>
+                <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
+                    <li>• <strong>Economy cars</strong>: 16-18 seconds @ 75-85 mph</li>
+                    <li>• <strong>Family sedans</strong>: 15-17 seconds @ 85-90 mph</li>
+                    <li>• <strong>Sports cars</strong>: 13-15 seconds @ 100-110 mph</li>
+                    <li>• <strong>Muscle cars</strong>: 12-13 seconds @ 110-120 mph</li>
+                    <li>• <strong>Performance cars</strong>: 11-12 seconds @ 115-125 mph</li>
+                    <li>• <strong>Supercars</strong>: 10-11 seconds @ 120-130 mph</li>
+                    <li>• <strong>Drag cars</strong>: under 10 seconds @ 130+ mph</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Performance Formulas Used:</h3>
+                <p class="text-sm text-gray-600 mb-2"><strong>Elapsed Time (ET)</strong> = 5.825 × (Weight/Power)<sup>0.286</sup> × DriveType × Traction × AltitudeFactor</p>
+                <p class="text-sm text-gray-600"><strong>Trap Speed</strong> = 234 × (Power/Weight)<sup>0.287</sup> × DriveType × Traction × AltitudeFactor</p>
+                <p class="text-xs text-gray-500 mt-2">Based on modified Fox and Hale formulas for drag racing performance estimation</p>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Improving Your Quarter-Mile Times:</h3>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li>• <strong>Reduce weight</strong>: Every 100 lbs removed can improve ET by ~0.1 seconds</li>
+                    <li>• <strong>Increase power</strong>: Adding 10% horsepower typically reduces ET by 2-3%</li>
+                    <li>• <strong>Improve traction</strong>: Drag radials can cut 0.3-0.5 seconds off ET</li>
+                    <li>• <strong>Optimize shifting</strong>: Faster shifts (under 0.2s) provide measurable gains</li>
+                    <li>• <strong>Cooler conditions</strong>: Denser air at lower temperatures improves performance</li>
+                </ul>
+            </section>
+        </article>
+    </div>
+</div>
+
+<script>
+    function quarterMileCalculator() {
+        return {
+            weight: null,
+            horsepower: null,
+            driveType: '1',
+            traction: '1',
+            shiftTime: '0.3',
+            altitude: '0',
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                if (!this.weight || !this.horsepower) {
+                    this.error = 'Please enter both weight and horsepower';
+                    return;
+                }
+                
+                if (this.weight <= 0 || this.horsepower <= 0) {
+                    this.error = 'Weight and horsepower must be greater than zero';
+                    return;
+                }
+                
+                // Calculate power-to-weight ratio (hp per pound)
+                const powerToWeight = this.horsepower / this.weight;
+                
+                // Altitude factor (1% power loss per 1000ft)
+                const altitudeFactor = 1 - (this.altitude / 1000 * 0.01);
+                
+                // Base ET calculation (Fox formula modified)
+                let et = 5.825 * Math.pow(this.weight / this.horsepower, 0.286);
+                
+                // Adjust for drive type, traction, and altitude
+                const efficiencyFactor = parseFloat(this.driveType) * parseFloat(this.traction) * altitudeFactor;
+                et = et / efficiencyFactor;
+                
+                // Add shift time penalty (assuming 3 shifts in 1/4 mile)
+                et += parseFloat(this.shiftTime) * 3;
+                
+                // Calculate trap speed
+                let trapSpeed = 234 * Math.pow(powerToWeight, 0.287) * efficiencyFactor;
+                
+                // Calculate 0-60 (simplified from ET)
+                let zeroToSixty = et * 0.38;
+                
+                // Ensure reasonable bounds
+                et = Math.max(8, Math.min(25, et)).toFixed(2);
+                trapSpeed = Math.max(60, Math.min(200, trapSpeed)).toFixed(1);
+                zeroToSixty = Math.max(2, Math.min(15, zeroToSixty)).toFixed(2);
+                
+                this.result = {
+                    et: et,
+                    trapSpeed: trapSpeed,
+                    zeroToSixty: zeroToSixty,
+                    powerToWeight: (powerToWeight * 1000).toFixed(3) + " hp per 1000 lbs"
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

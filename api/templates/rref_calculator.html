@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}RREF Calculator - Find Reduced Row Echelon Form Online | [YourSiteName]{% endblock %}
+
+{% block meta_description %}Free online RREF calculator tool that transforms any matrix into reduced row echelon form instantly. Perfect for linear algebra students and professionals.{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Reduced Row Echelon Form (RREF) Calculator</h1>
+        
+        <div class="mb-4">
+            <p class="text-gray-600">Transform any matrix to reduced row echelon form (RREF) with our free online calculator. Perfect for solving systems of linear equations, determining matrix rank, and more.</p>
+        </div>
+        
+        <div x-data="rrefCalculator()" class="space-y-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <label for="rows" class="block text-sm font-medium text-gray-700 mb-1">Rows</label>
+                    <input x-model="rows" type="number" min="1" max="6" @change="updateMatrix()" 
+                           class="w-20 px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                           aria-label="Number of matrix rows">
+                </div>
+                <div>
+                    <label for="cols" class="block text-sm font-medium text-gray-700 mb-1">Columns</label>
+                    <input x-model="cols" type="number" min="1" max="6" @change="updateMatrix()" 
+                           class="w-20 px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                           aria-label="Number of matrix columns">
+                </div>
+                <button @click="calculateRREF()" class="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200">
+                    Calculate RREF
+                </button>
+            </div>
+
+            <!-- Matrix Input -->
+            <div class="overflow-x-auto">
+                <h2 class="sr-only">Matrix Input</h2>
+                <table class="min-w-full border border-gray-200" aria-label="Matrix input table">
+                    <tbody>
+                        <template x-for="(row, rowIndex) in matrix" :key="rowIndex">
+                            <tr>
+                                <template x-for="(col, colIndex) in row" :key="colIndex">
+                                    <td class="border border-gray-200 px-2 py-1">
+                                        <input x-model="matrix[rowIndex][colIndex]" type="number" step="any" 
+                                               class="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-primary focus:border-primary"
+                                               :aria-label="`Matrix element at row ${rowIndex+1}, column ${colIndex+1}`">
+                                    </td>
+                                </template>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Results -->
+            <div x-show="result" x-transition class="mt-6">
+                <h2 class="text-lg font-semibold mb-2">Reduced Row Echelon Form Result</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full border border-gray-200" aria-label="RREF result table">
+                        <tbody>
+                            <template x-for="(row, rowIndex) in result" :key="rowIndex">
+                                <tr>
+                                    <template x-for="(col, colIndex) in row" :key="colIndex">
+                                        <td class="border border-gray-200 px-4 py-2 text-center" 
+                                            :class="{ 'bg-blue-50': col !== 0 }">
+                                            <span x-text="col.toFixed(4)"></span>
+                                        </td>
+                                    </template>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4 mt-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-800">Error</h3>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">Understanding Reduced Row Echelon Form (RREF)</h2>
+            <p class="text-gray-600 mb-4">The Reduced Row Echelon Form (RREF) is a fundamental concept in linear algebra that simplifies matrices to their most basic structure while preserving essential information about the linear system they represent.</p>
+            
+            <section class="mb-6">
+                <h3 class="font-medium text-gray-800 mb-2">Key Characteristics of RREF:</h3>
+                <ul class="list-disc pl-5 text-gray-600 mb-4 space-y-1">
+                    <li><strong>Leading ones:</strong> The first non-zero number in each row (called the leading coefficient) is always 1</li>
+                    <li><strong>Zero rows at bottom:</strong> All rows consisting entirely of zeros appear below rows with non-zero entries</li>
+                    <li><strong>Staircase pattern:</strong> Each leading 1 is positioned to the right of the leading 1 in the row above it</li>
+                    <li><strong>Column simplification:</strong> All entries above and below each leading 1 are zero</li>
+                </ul>
+            </section>
+
+            <section class="mb-6">
+                <h3 class="font-medium text-gray-800 mb-2">Practical Applications of RREF:</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <h4 class="font-medium text-gray-700 mb-2">Academic Uses</h4>
+                        <ul class="space-y-1 text-sm text-gray-600">
+                            <li>• Solving systems of linear equations</li>
+                            <li>• Determining linear independence of vectors</li>
+                            <li>• Finding the rank of a matrix</li>
+                            <li>• Calculating matrix inverses</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <h4 class="font-medium text-gray-700 mb-2">Real-World Applications</h4>
+                        <ul class="space-y-1 text-sm text-gray-600">
+                            <li>• Computer graphics transformations</li>
+                            <li>• Economic modeling</li>
+                            <li>• Engineering system analysis</li>
+                            <li>• Data science and machine learning</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h3 class="font-medium text-gray-800 mb-2">RREF Example</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Original Matrix:</h4>
+                        <pre class="text-sm bg-white p-2 rounded border overflow-x-auto">[ 1  2  3 ]
+[ 4  5  6 ]
+[ 7  8  9 ]</pre>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">RREF Form:</h4>
+                        <pre class="text-sm bg-white p-2 rounded border overflow-x-auto">[ 1  0 -1 ]
+[ 0  1  2 ]
+[ 0  0  0 ]</pre>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 mt-3">This example shows how our RREF calculator simplifies matrices to reveal fundamental properties like rank and solution sets for linear systems.</p>
+            </section>
+        </article>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mt-6">
+        <h2 class="text-xl font-semibold text-dark mb-4">How to Use This RREF Calculator</h2>
+        <ol class="list-decimal pl-5 space-y-3 text-gray-600">
+            <li><strong>Set matrix dimensions:</strong> Adjust the rows and columns to match your matrix size</li>
+            <li><strong>Enter matrix values:</strong> Fill in all elements of your matrix</li>
+            <li><strong>Click "Calculate RREF":</strong> Our tool will instantly compute the reduced row echelon form</li>
+            <li><strong>Analyze results:</strong> The simplified matrix reveals key information about your linear system</li>
+        </ol>
+        <p class="mt-4 text-gray-600">This RREF calculator handles matrices up to 6×6, making it suitable for most classroom and homework problems in linear algebra.</p>
+    </div>
+</div>
+
+<script>
+function rrefCalculator() {
+    return {
+        rows: 3,
+        cols: 3,
+        matrix: Array(3).fill().map(() => Array(3).fill(0)),
+        result: null,
+        error: null,
+        
+        init() {
+            this.updateMatrix();
+        },
+        
+        updateMatrix() {
+            // Validate dimensions
+            this.rows = Math.max(1, Math.min(6, parseInt(this.rows) || 3));
+            this.cols = Math.max(1, Math.min(6, parseInt(this.cols) || 3));
+            
+            // Create new matrix with the right dimensions
+            const newMatrix = Array(this.rows).fill().map((_, i) => 
+                Array(this.cols).fill().map((_, j) => 
+                    (this.matrix[i] && this.matrix[i][j] !== undefined) ? this.matrix[i][j] : 0
+                )
+            );
+            
+            this.matrix = newMatrix;
+        },
+        
+        calculateRREF() {
+            try {
+                this.error = null;
+                const matrix = this.matrix.map(row => [...row]);
+                this.result = this.computeRREF(matrix);
+            } catch (e) {
+                this.error = e.message;
+                this.result = null;
+            }
+        },
+        
+        computeRREF(matrix) {
+            let lead = 0;
+            const rowCount = matrix.length;
+            const colCount = matrix[0].length;
+            
+            for (let r = 0; r < rowCount; r++) {
+                if (colCount <= lead) return matrix;
+                
+                let i = r;
+                while (matrix[i][lead] === 0) {
+                    i++;
+                    if (rowCount === i) {
+                        i = r;
+                        lead++;
+                        if (colCount === lead) return matrix;
+                    }
+                }
+                
+                // Swap rows i and r
+                [matrix[i], matrix[r]] = [matrix[r], matrix[i]];
+                
+                // Normalize row r
+                const val = matrix[r][lead];
+                if (val !== 0) {
+                    for (let j = 0; j < colCount; j++) {
+                        matrix[r][j] /= val;
+                    }
+                }
+                
+                // Eliminate other rows
+                for (let i = 0; i < rowCount; i++) {
+                    if (i !== r) {
+                        const val = matrix[i][lead];
+                        for (let j = 0; j < colCount; j++) {
+                            matrix[i][j] -= val * matrix[r][j];
+                        }
+                    }
+                }
+                
+                lead++;
+            }
+            
+            return matrix;
+        }
+    }
+}
+</script>
+{% endblock %}

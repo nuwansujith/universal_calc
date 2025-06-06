@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Towing Capacity Calculator 2024 | Accurate Towing Estimate Tool{% endblock %}
+
+{% block meta_description %}Calculate your vehicle's towing capacity with our free towing calculator. Estimate safe trailer weights, tongue weight percentages, and MPG impact for trucks, SUVs, and vehicles. Get accurate towing estimates instantly.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Towing Capacity Calculator 2024</h1>
+        
+        <div x-data="towingCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="vehicleWeight" class="block text-sm font-medium text-gray-700 mb-1">Vehicle GVWR (lbs)</label>
+                    <input x-model="vehicleWeight" type="number" id="vehicleWeight" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 6000">
+                    <p class="text-xs text-gray-500 mt-1">Gross Vehicle Weight Rating - Find this in your owner's manual or door jamb sticker</p>
+                </div>
+                <div>
+                    <label for="trailerWeight" class="block text-sm font-medium text-gray-700 mb-1">Trailer Weight (lbs)</label>
+                    <input x-model="trailerWeight" type="number" id="trailerWeight" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 5000">
+                    <p class="text-xs text-gray-500 mt-1">Include fully loaded trailer weight (cargo, fluids, etc.)</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="tongueWeight" class="block text-sm font-medium text-gray-700 mb-1">Tongue Weight (lbs)</label>
+                    <input x-model="tongueWeight" type="number" id="tongueWeight" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 500">
+                    <p class="text-xs text-gray-500 mt-1">Typically 10-15% of trailer weight - Critical for safe towing</p>
+                </div>
+                <div>
+                    <label for="passengers" class="block text-sm font-medium text-gray-700 mb-1">Passengers + Cargo (lbs)</label>
+                    <input x-model="passengers" type="number" id="passengers" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 800">
+                    <p class="text-xs text-gray-500 mt-1">Include all people, gear, and aftermarket accessories</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="terrain" class="block text-sm font-medium text-gray-700 mb-1">Terrain Type</label>
+                    <select x-model="terrain" id="terrain" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="1">Flat (Highway, Plains)</option>
+                        <option value="1.2">Rolling Hills (Country Roads)</option>
+                        <option value="1.5">Mountainous (Steep Grades)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="altitude" class="block text-sm font-medium text-gray-700 mb-1">Average Altitude (feet)</label>
+                    <input x-model="altitude" type="number" id="altitude" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 1000" value="0">
+                    <p class="text-xs text-gray-500 mt-1">Higher altitudes reduce engine performance</p>
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate My Towing Capacity
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Your Towing Capacity Results</h2>
+                        <div class="mt-1 text-green-700 space-y-2">
+                            <p>Total Combined Weight: <span class="font-bold" x-text="result.combinedWeight"></span> lbs</p>
+                            <p>GCWR Utilization: <span class="font-bold" x-text="result.gcwrPercent"></span>%</p>
+                            <p>Tongue Weight Percentage: <span class="font-bold" x-text="result.tonguePercent"></span>%</p>
+                            <p>Estimated MPG While Towing: <span class="font-bold" x-text="result.estimatedMPG"></span></p>
+                            <p class="pt-2" x-show="result.safe" class="text-green-600">✅ This setup appears to be within safe towing limits</p>
+                            <p class="pt-2" x-show="!result.safe" class="text-red-600">⚠️ Warning: This setup may exceed safe towing limits</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-800">Error</h3>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <h2 class="text-xl font-semibold text-dark mb-4">Towing Capacity Guidelines & Safety Information</h2>
+        <p class="text-gray-600 mb-4">Our towing calculator helps you determine safe towing limits for your vehicle. Proper towing capacity depends on your vehicle's specifications, trailer setup, and driving conditions. Always consult your owner's manual for manufacturer-specific towing guidelines.</p>
+        
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">Key Towing Terms Explained:</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+                <li><strong>GVWR (Gross Vehicle Weight Rating)</strong>: The maximum loaded weight your vehicle can safely handle, including passengers, cargo, and fuel.</li>
+                <li><strong>GCWR (Gross Combined Weight Rating)</strong>: The maximum allowable weight of your vehicle plus trailer and everything in/on them.</li>
+                <li><strong>Tongue Weight</strong>: The downward force exerted on the hitch ball by the trailer (critical for stability).</li>
+                <li><strong>Payload Capacity</strong>: The maximum weight your vehicle can carry including passengers and cargo (found on door jamb sticker).</li>
+            </ul>
+        </div>
+
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">Towing Safety Recommendations:</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+                <li>• <strong>Never exceed</strong> your vehicle's GCWR or GVWR - this can cause dangerous handling and brake failure</li>
+                <li>• Maintain proper tongue weight (10-15% of trailer weight) to prevent trailer sway</li>
+                <li>• Allow for <strong>longer braking distances</strong> (2-3x normal) when towing heavy loads</li>
+                <li>• Reduce speed when towing (typically 55-65 mph max depending on conditions)</li>
+                <li>• Consider <strong>trailer brakes</strong> for loads over 3,000 lbs - required in many states for heavier trailers</li>
+                <li>• Perform a <strong>pre-tow inspection</strong> of lights, tires, hitch, and safety chains</li>
+            </ul>
+        </div>
+
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">MPG Impact While Towing:</h3>
+            <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
+                <li>• <strong>Small utility trailers</strong> (1,000-2,000 lbs): 15-25% MPG reduction</li>
+                <li>• <strong>Boat trailers</strong> (3,000-5,000 lbs): 30-40% MPG reduction</li>
+                <li>• <strong>Travel trailers</strong> (6,000-10,000 lbs): 45-60% MPG reduction</li>
+                <li>• <strong>Horse trailers</strong> (10,000+ lbs): 60-75% MPG reduction</li>
+                <li>• <strong>Flatbed trailers</strong>: Add 5-10% more reduction due to wind resistance</li>
+                <li>• <strong>Enclosed trailers</strong>: Add 10-15% more reduction due to aerodynamic drag</li>
+            </ul>
+        </div>
+
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">Terrain & Altitude Effects on Towing:</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+                <li><strong>Flat terrain</strong>: Minimal additional strain - ideal for maximum towing capacity</li>
+                <li><strong>Rolling hills</strong>: 20% more strain than flat - may require gear selection</li>
+                <li><strong>Mountainous terrain</strong>: 50% more strain - consider reducing load by 10-15%</li>
+                <li><strong>High altitude</strong>: 3% power loss per 1,000 ft elevation - turbocharged engines less affected</li>
+                <li><strong>Hot weather</strong>: Add 10% more strain in temperatures above 90°F</li>
+            </ul>
+        </div>
+
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">Frequently Asked Questions:</h3>
+            <div class="space-y-4">
+                <div>
+                    <h4 class="font-medium text-gray-700">How accurate is this towing calculator?</h4>
+                    <p class="text-sm text-gray-600 mt-1">Our calculator provides estimates based on general towing principles. For exact figures, consult your vehicle's owner's manual or manufacturer specifications, as towing capacity varies by make, model, and configuration.</p>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-700">What if my tongue weight is outside 10-15%?</h4>
+                    <p class="text-sm text-gray-600 mt-1">Improper tongue weight can cause dangerous trailer sway (too light) or strain your vehicle's rear suspension (too heavy). Adjust cargo distribution in your trailer to achieve proper tongue weight before towing.</p>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-700">Do I need special equipment for towing?</h4>
+                    <p class="text-sm text-gray-600 mt-1">Depending on weight, you may need: a weight distribution hitch (over 5,000 lbs), trailer brakes (over 3,000 lbs in most states), upgraded cooling systems, and transmission temperature monitoring for heavy loads.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function towingCalculator() {
+        return {
+            vehicleWeight: null,
+            trailerWeight: null,
+            tongueWeight: null,
+            passengers: null,
+            terrain: '1',
+            altitude: '0',
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                // Validate inputs
+                if (!this.vehicleWeight || !this.trailerWeight || !this.tongueWeight || !this.passengers) {
+                    this.error = 'Please fill in all required fields';
+                    return;
+                }
+                
+                if (this.vehicleWeight <= 0 || this.trailerWeight <= 0 || this.tongueWeight <= 0 || this.passengers < 0) {
+                    this.error = 'All weight values must be greater than zero';
+                    return;
+                }
+                
+                // Calculate combined weight
+                const combinedWeight = parseFloat(this.vehicleWeight) + parseFloat(this.trailerWeight) + parseFloat(this.passengers);
+                
+                // Estimate GCWR (1.5x GVWR is typical safety margin)
+                const estimatedGCWR = this.vehicleWeight * 1.5 + this.trailerWeight;
+                
+                // Calculate utilization percentages
+                const gcwrPercent = Math.min(100, (combinedWeight / estimatedGCWR * 100).toFixed(1));
+                const tonguePercent = (this.tongueWeight / this.trailerWeight * 100).toFixed(1);
+                
+                // Estimate MPG impact (base 20mpg, reduced by weight and terrain)
+                const baseMPG = 20;
+                const weightFactor = Math.min(0.8, 1 - (this.trailerWeight / 20000));
+                const terrainFactor = 1 / parseFloat(this.terrain);
+                const altitudeFactor = 1 - (this.altitude / 1000 * 0.03);
+                const estimatedMPG = (baseMPG * weightFactor * terrainFactor * altitudeFactor).toFixed(1);
+                
+                // Determine if setup is safe
+                const safe = gcwrPercent <= 100 && tonguePercent >= 10 && tonguePercent <= 15;
+                
+                this.result = {
+                    combinedWeight: combinedWeight.toLocaleString(),
+                    gcwrPercent: gcwrPercent,
+                    tonguePercent: tonguePercent,
+                    estimatedMPG: estimatedMPG,
+                    safe: safe
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

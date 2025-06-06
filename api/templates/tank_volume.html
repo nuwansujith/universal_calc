@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block title %}Tank Volume Calculator - Calculate Capacity in Gallons, Liters & Cubic Feet{% endblock %}
+
+{% block meta_description %}Free online tank volume calculator for cylindrical, rectangular, oval & capsule tanks. Accurately calculate liquid capacity in gallons, liters, cubic feet & cubic meters for water tanks, fuel storage, and industrial containers.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-2">Tank Volume Calculator</h1>
+        <p class="text-gray-600 mb-6">Calculate the liquid capacity of your storage tank in multiple units with our precise volume calculator.</p>
+        
+        <div x-data="tankCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label for="tankShape" class="block text-sm font-medium text-gray-700 mb-1">Tank Shape</label>
+                    <select x-model="shape" id="tankShape" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" @change="resetResults()">
+                        <option value="cylinder">Cylinder (Vertical/Horizontal)</option>
+                        <option value="rectangle">Rectangle (Box Tank)</option>
+                        <option value="oval">Oval (Horizontal Tank)</option>
+                        <option value="capsule">Capsule (Spherical Ends)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Cylinder Fields -->
+            <div x-show="shape === 'cylinder'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="diameter" class="block text-sm font-medium text-gray-700 mb-1">Diameter (ft)</label>
+                    <input x-model="diameter" type="number" id="diameter" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div>
+                    <label for="height" class="block text-sm font-medium text-gray-700 mb-1">Height/Length (ft)</label>
+                    <input x-model="height" type="number" id="height" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00" step="0.01" min="0">
+                </div>
+            </div>
+
+            <!-- Rectangle Fields -->
+            <div x-show="shape === 'rectangle'" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="length" class="block text-sm font-medium text-gray-700 mb-1">Length (ft)</label>
+                    <input x-model="length" type="number" id="length" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div>
+                    <label for="width" class="block text-sm font-medium text-gray-700 mb-1">Width (ft)</label>
+                    <input x-model="width" type="number" id="width" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div>
+                    <label for="heightRect" class="block text-sm font-medium text-gray-700 mb-1">Height (ft)</label>
+                    <input x-model="heightRect" type="number" id="heightRect" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00" step="0.01" min="0">
+                </div>
+            </div>
+
+            <!-- Oval Fields -->
+            <div x-show="shape === 'oval'" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="majorAxis" class="block text-sm font-medium text-gray-700 mb-1">Major Axis (ft)</label>
+                    <input x-model="majorAxis" type="number" id="majorAxis" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div>
+                    <label for="minorAxis" class="block text-sm font-medium text-gray-700 mb-1">Minor Axis (ft)</label>
+                    <input x-model="minorAxis" type="number" id="minorAxis" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div>
+                    <label for="heightOval" class="block text-sm font-medium text-gray-700 mb-1">Height (ft)</label>
+                    <input x-model="heightOval" type="number" id="heightOval" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00" step="0.01" min="0">
+                </div>
+            </div>
+
+            <!-- Capsule Fields -->
+            <div x-show="shape === 'capsule'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="diameterCap" class="block text-sm font-medium text-gray-700 mb-1">Diameter (ft)</label>
+                    <input x-model="diameterCap" type="number" id="diameterCap" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div>
+                    <label for="lengthCap" class="block text-sm font-medium text-gray-700 mb-1">Cylinder Length (ft)</label>
+                    <input x-model="lengthCap" type="number" id="lengthCap" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00" step="0.01" min="0">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label for="unit" class="block text-sm font-medium text-gray-700 mb-1">Output Unit</label>
+                    <select x-model="unit" id="unit" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="gallons">Gallons (US Liquid)</option>
+                        <option value="liters">Liters</option>
+                        <option value="cubicFeet">Cubic Feet</option>
+                        <option value="cubicMeters">Cubic Meters</option>
+                    </select>
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate Tank Volume
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-green-800">Tank Capacity Result</h3>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Volume: <span class="font-bold" x-text="result.volume"></span> <span x-text="unitText"></span></p>
+                            <p x-show="result.gallons">Gallons: <span class="font-bold" x-text="result.gallons"></span> (US Liquid Gallons)</p>
+                            <p x-show="result.liters">Liters: <span class="font-bold" x-text="result.liters"></span></p>
+                            <p x-show="result.cubicFeet">Cubic Feet: <span class="font-bold" x-text="result.cubicFeet"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-800">Calculation Error</h3>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <h2 class="text-xl font-semibold text-dark mb-4">Tank Volume Calculation Formulas</h2>
+        <p class="text-gray-600 mb-4">Understand the mathematical formulas behind our tank capacity calculations:</p>
+        
+        <div class="space-y-4">
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Cylindrical Tank Volume Calculation</h3>
+                <p class="text-sm text-gray-600 mb-2">For vertical or horizontal cylindrical tanks (common in water storage and fuel tanks):</p>
+                <p class="text-sm text-gray-600 font-mono bg-gray-100 p-2 rounded">Volume = π × (diameter ÷ 2)² × height</p>
+                <p class="text-xs text-gray-500 mt-1">Where π ≈ 3.14159 and diameter is the internal width of the tank</p>
+            </div>
+            
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Rectangular Tank Volume Calculation</h3>
+                <p class="text-sm text-gray-600 mb-2">For box-shaped tanks (common in aquariums and industrial containers):</p>
+                <p class="text-sm text-gray-600 font-mono bg-gray-100 p-2 rounded">Volume = length × width × height</p>
+                <p class="text-xs text-gray-500 mt-1">All dimensions should be internal measurements in feet</p>
+            </div>
+            
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Oval Tank Volume Calculation</h3>
+                <p class="text-sm text-gray-600 mb-2">For horizontal oval tanks (common in transportation and storage):</p>
+                <p class="text-sm text-gray-600 font-mono bg-gray-100 p-2 rounded">Volume = π × (major axis ÷ 2) × (minor axis ÷ 2) × height</p>
+                <p class="text-xs text-gray-500 mt-1">Major axis is the longest diameter, minor axis is the shortest</p>
+            </div>
+            
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Capsule Tank Volume Calculation</h3>
+                <p class="text-sm text-gray-600 mb-2">For tanks with hemispherical ends (common in pharmaceutical and chemical industries):</p>
+                <p class="text-sm text-gray-600 font-mono bg-gray-100 p-2 rounded">Volume = π × (diameter ÷ 2)² × (cylinder length + (4/3 × radius))</p>
+                <p class="text-xs text-gray-500 mt-1">Where radius = diameter ÷ 2</p>
+            </div>
+        </div>
+        
+        <div class="mt-6">
+            <h3 class="font-medium text-gray-700 mb-3">Tank Volume Conversion Reference</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">Liquid Volume Conversions</h4>
+                    <ul class="space-y-1 text-sm text-gray-600">
+                        <li>• 1 US gallon = 3.78541 liters</li>
+                        <li>• 1 liter = 0.264172 US gallons</li>
+                        <li>• 1 imperial gallon = 1.20095 US gallons</li>
+                        <li>• 1 barrel (petroleum) = 42 US gallons</li>
+                    </ul>
+                </div>
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">Volume to Capacity</h4>
+                    <ul class="space-y-1 text-sm text-gray-600">
+                        <li>• 1 cubic foot = 7.48052 US gallons</li>
+                        <li>• 1 cubic foot = 28.3168 liters</li>
+                        <li>• 1 cubic meter = 264.172 US gallons</li>
+                        <li>• 1 cubic meter = 1000 liters</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">Frequently Asked Questions</h3>
+            <div class="space-y-3">
+                <details class="p-3 border border-gray-200 rounded-lg">
+                    <summary class="font-medium cursor-pointer">How do I measure my tank dimensions accurately?</summary>
+                    <div class="mt-2 text-sm text-gray-600 space-y-2">
+                        <p>For best results:</p>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>Measure internal dimensions (excluding tank walls)</li>
+                            <li>For cylindrical tanks, measure diameter at the widest point</li>
+                            <li>For oval tanks, measure both major and minor axes</li>
+                            <li>Use consistent units (all in feet or all in inches)</li>
+                        </ul>
+                    </div>
+                </details>
+                <details class="p-3 border border-gray-200 rounded-lg">
+                    <summary class="font-medium cursor-pointer">Does this calculator account for tank thickness?</summary>
+                    <p class="mt-2 text-sm text-gray-600">This calculator computes total internal volume. For precise capacity calculations, subtract wall thickness from your measurements or consult your tank specifications.</p>
+                </details>
+                <details class="p-3 border border-gray-200 rounded-lg">
+                    <summary class="font-medium cursor-pointer">How do I calculate partial tank volume?</summary>
+                    <p class="mt-2 text-sm text-gray-600">For partially filled tanks, measure the liquid height/depth instead of the full tank height. The calculator will compute the volume based on the liquid level.</p>
+                </details>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function tankCalculator() {
+        return {
+            shape: 'cylinder',
+            diameter: null,
+            height: null,
+            length: null,
+            width: null,
+            heightRect: null,
+            majorAxis: null,
+            minorAxis: null,
+            heightOval: null,
+            diameterCap: null,
+            lengthCap: null,
+            unit: 'gallons',
+            result: null,
+            error: null,
+            
+            get unitText() {
+                switch(this.unit) {
+                    case 'gallons': return 'gallons (US)';
+                    case 'liters': return 'liters';
+                    case 'cubicFeet': return 'cubic feet';
+                    case 'cubicMeters': return 'cubic meters';
+                    default: return '';
+                }
+            },
+            
+            resetResults() {
+                this.result = null;
+                this.error = null;
+            },
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                try {
+                    let volumeCubicFeet = 0;
+                    const pi = Math.PI;
+                    
+                    // Calculate based on shape
+                    switch(this.shape) {
+                        case 'cylinder':
+                            if (!this.diameter || !this.height) {
+                                this.error = 'Please enter diameter and height';
+                                return;
+                            }
+                            if (this.diameter <= 0 || this.height <= 0) {
+                                this.error = 'Diameter and height must be greater than zero';
+                                return;
+                            }
+                            const radius = this.diameter / 2;
+                            volumeCubicFeet = pi * Math.pow(radius, 2) * this.height;
+                            break;
+                            
+                        case 'rectangle':
+                            if (!this.length || !this.width || !this.heightRect) {
+                                this.error = 'Please enter length, width, and height';
+                                return;
+                            }
+                            if (this.length <= 0 || this.width <= 0 || this.heightRect <= 0) {
+                                this.error = 'Dimensions must be greater than zero';
+                                return;
+                            }
+                            volumeCubicFeet = this.length * this.width * this.heightRect;
+                            break;
+                            
+                        case 'oval':
+                            if (!this.majorAxis || !this.minorAxis || !this.heightOval) {
+                                this.error = 'Please enter major axis, minor axis, and height';
+                                return;
+                            }
+                            if (this.majorAxis <= 0 || this.minorAxis <= 0 || this.heightOval <= 0) {
+                                this.error = 'Dimensions must be greater than zero';
+                                return;
+                            }
+                            const majorRadius = this.majorAxis / 2;
+                            const minorRadius = this.minorAxis / 2;
+                            volumeCubicFeet = pi * majorRadius * minorRadius * this.heightOval;
+                            break;
+                            
+                        case 'capsule':
+                            if (!this.diameterCap || !this.lengthCap) {
+                                this.error = 'Please enter diameter and cylinder length';
+                                return;
+                            }
+                            if (this.diameterCap <= 0 || this.lengthCap <= 0) {
+                                this.error = 'Dimensions must be greater than zero';
+                                return;
+                            }
+                            const capRadius = this.diameterCap / 2;
+                            const sphereVolume = (4/3) * pi * Math.pow(capRadius, 3);
+                            const cylinderVolume = pi * Math.pow(capRadius, 2) * this.lengthCap;
+                            volumeCubicFeet = cylinderVolume + sphereVolume;
+                            break;
+                    }
+                    
+                    // Convert to all units
+                    const gallons = volumeCubicFeet * 7.48052;
+                    const liters = volumeCubicFeet * 28.3168;
+                    const cubicMeters = volumeCubicFeet * 0.0283168;
+                    
+                    // Determine which value to show based on selected unit
+                    let displayVolume;
+                    switch(this.unit) {
+                        case 'gallons': displayVolume = gallons; break;
+                        case 'liters': displayVolume = liters; break;
+                        case 'cubicFeet': displayVolume = volumeCubicFeet; break;
+                        case 'cubicMeters': displayVolume = cubicMeters; break;
+                    }
+                    
+                    this.result = {
+                        volume: displayVolume.toFixed(2),
+                        gallons: gallons.toFixed(2),
+                        liters: liters.toFixed(2),
+                        cubicFeet: volumeCubicFeet.toFixed(2),
+                        cubicMeters: cubicMeters.toFixed(2)
+                    };
+                    
+                } catch (e) {
+                    this.error = 'An error occurred during calculation';
+                    console.error(e);
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Paver Calculator - Estimate Materials for Your Patio or Walkway{% endblock %}
+
+{% block meta_description %}Free online paver calculator. Estimate how many pavers you need for your project, including sand requirements and total cost. Works for brick, concrete, and stone pavers.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Paver Calculator</h1>
+        
+        <div x-data="paverCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="length" class="block text-sm font-medium text-gray-700 mb-1">Area Length (ft)</label>
+                    <input x-model="length" type="number" id="length" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
+                </div>
+                <div>
+                    <label for="width" class="block text-sm font-medium text-gray-700 mb-1">Area Width (ft)</label>
+                    <input x-model="width" type="number" id="width" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="paverSize" class="block text-sm font-medium text-gray-700 mb-1">Paver Size</label>
+                    <select x-model="paverSize" id="paverSize" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="4x8">4" × 8" (Brick)</option>
+                        <option value="6x6">6" × 6"</option>
+                        <option value="6x9">6" × 9"</option>
+                        <option value="12x12">12" × 12"</option>
+                        <option value="12x18">12" × 18"</option>
+                        <option value="large">Large Format (24" × 24")</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="jointWidth" class="block text-sm font-medium text-gray-700 mb-1">Joint Width (in)</label>
+                    <input x-model="jointWidth" type="number" step="0.125" id="jointWidth" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.25" value="0.25">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="wasteFactor" class="block text-sm font-medium text-gray-700 mb-1">Waste Factor (%)</label>
+                    <input x-model="wasteFactor" type="number" id="wasteFactor" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="10" value="10">
+                </div>
+                <div>
+                    <label for="unitPrice" class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($/sq ft)</label>
+                    <input x-model="unitPrice" type="number" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate Pavers Needed
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Paver Calculation Results</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Total Area: <span class="font-bold" x-text="result.totalArea"></span> sq ft</p>
+                            <p>Pavers Needed: <span class="font-bold" x-text="result.paversNeeded"></span></p>
+                            <p>Including Waste: <span class="font-bold" x-text="result.totalWithWaste"></span> pavers</p>
+                            <p>Sand Needed: <span class="font-bold" x-text="result.sandNeeded"></span> cu ft</p>
+                            <p x-show="unitPrice">Total Cost: $<span class="font-bold" x-text="result.totalCost"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-800">Error</h3>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">Paver Calculator: Estimate Materials for Your Project</h2>
+            <p class="text-gray-600 mb-4">Our free paver calculator helps you estimate the materials needed for your patio, walkway, or driveway project. Whether you're using brick, concrete, or natural stone pavers, this tool provides accurate calculations for:</p>
+            
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">What This Calculator Estimates:</h3>
+                <ul class="list-disc list-inside space-y-2 text-gray-600">
+                    <li><strong>Number of pavers needed</strong> for your specified area</li>
+                    <li><strong>Sand requirements</strong> for the base layer (1" depth)</li>
+                    <li><strong>Total project cost</strong> when you enter paver price</li>
+                    <li><strong>Waste factor</strong> (recommended 10% for cuts and breakage)</li>
+                    <li><strong>Joint spacing</strong> between pavers (adjustable)</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Common Paver Sizes Supported:</h3>
+                <div class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                    <div class="flex items-center">
+                        <span class="font-medium w-16">4" × 8"</span>
+                        <span>Standard brick pavers</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="font-medium w-16">6" × 6"</span>
+                        <span>Small square pavers</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="font-medium w-16">6" × 9"</span>
+                        <span>Rectangular pavers</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="font-medium w-16">12" × 12"</span>
+                        <span>Standard concrete pavers</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="font-medium w-16">12" × 18"</span>
+                        <span>Large rectangular pavers</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="font-medium w-16">24" × 24"</span>
+                        <span>Large format pavers</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">How to Use This Paver Calculator:</h3>
+                <ol class="list-decimal list-inside space-y-2 text-gray-600">
+                    <li>Measure your project area length and width in feet</li>
+                    <li>Select your paver size from the dropdown</li>
+                    <li>Enter your desired joint width (typically 0.25"-0.5")</li>
+                    <li>Set your waste factor (10% recommended)</li>
+                    <li>Optionally enter paver price per sq ft for cost estimate</li>
+                    <li>Click "Calculate Pavers Needed" for your results</li>
+                </ol>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Paver Installation Tips:</h3>
+                <ul class="list-disc list-inside space-y-2 text-gray-600">
+                    <li>Always order 10% extra pavers for cuts and waste</li>
+                    <li>Use polymeric sand for better joint stability</li>
+                    <li>Prepare a proper base with compacted gravel</li>
+                    <li>Maintain consistent joint spacing throughout</li>
+                    <li>Consider edge restraints for long-term stability</li>
+                </ul>
+                <p class="mt-2 text-sm text-gray-500">Note: This calculator provides estimates only. Actual requirements may vary based on project specifics.</p>
+            </section>
+        </article>
+    </div>
+</div>
+
+<script>
+    function paverCalculator() {
+        return {
+            length: null,
+            width: null,
+            paverSize: '4x8',
+            jointWidth: 0.25,
+            wasteFactor: 10,
+            unitPrice: null,
+            result: null,
+            error: null,
+            
+            paverSizes: {
+                '4x8': { width: 4, length: 8, area: 32 },
+                '6x6': { width: 6, length: 6, area: 36 },
+                '6x9': { width: 6, length: 9, area: 54 },
+                '12x12': { width: 12, length: 12, area: 144 },
+                '12x18': { width: 12, length: 18, area: 216 },
+                'large': { width: 24, length: 24, area: 576 }
+            },
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                if (!this.length || !this.width) {
+                    this.error = 'Please fill in all required fields';
+                    return;
+                }
+                
+                if (this.length <= 0 || this.width <= 0 || this.jointWidth < 0 || this.wasteFactor < 0) {
+                    this.error = 'All values must be greater than zero';
+                    return;
+                }
+                
+                // Calculate total area in square inches
+                const totalArea = this.length * this.width * 144; // convert to sq inches
+                const selectedPaver = this.paverSizes[this.paverSize];
+                
+                // Calculate effective paver size including joints
+                const effectiveWidth = selectedPaver.width + this.jointWidth;
+                const effectiveLength = selectedPaver.length + this.jointWidth;
+                const effectiveArea = effectiveWidth * effectiveLength;
+                
+                // Calculate number of pavers needed
+                const paversNeeded = totalArea / (selectedPaver.width * selectedPaver.length);
+                const totalWithWaste = paversNeeded * (1 + (this.wasteFactor / 100));
+                
+                // Calculate sand needed (1" depth)
+                const sandNeeded = (this.length * this.width * 0.0833).toFixed(1); // 1" = 0.0833 ft
+                
+                this.result = {
+                    totalArea: (this.length * this.width).toFixed(2),
+                    paversNeeded: Math.ceil(paversNeeded),
+                    totalWithWaste: Math.ceil(totalWithWaste),
+                    sandNeeded: sandNeeded,
+                    totalCost: this.unitPrice ? (totalWithWaste * (selectedPaver.area / 144) * this.unitPrice).toFixed(2) : null
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

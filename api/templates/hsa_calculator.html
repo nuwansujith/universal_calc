@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}HSA Calculator 2024 - Estimate Your Health Savings Account Growth | YourSiteName{% endblock %}
+
+{% block meta_description %}Use our free HSA calculator to estimate your Health Savings Account growth. Calculate contributions, tax savings, and projected balance for 2023-2024. Maximize your HSA benefits today.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Health Savings Account (HSA) Calculator: Maximize Your Tax-Advantaged Savings</h1>
+        
+        <div x-data="hsaCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="filingStatus" class="block text-sm font-medium text-gray-700 mb-1">Filing Status</label>
+                    <select x-model="filingStatus" id="filingStatus" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" aria-label="Select your tax filing status">
+                        <option value="single">Single</option>
+                        <option value="family">Family</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="year" class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                    <select x-model="year" id="year" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" aria-label="Select tax year">
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="annualContribution" class="block text-sm font-medium text-gray-700 mb-1">Annual Contribution ($)</label>
+                    <input x-model="annualContribution" type="number" id="annualContribution" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0" aria-label="Enter your annual HSA contribution amount">
+                </div>
+                <div>
+                    <label for="employerContribution" class="block text-sm font-medium text-gray-700 mb-1">Employer Contribution ($)</label>
+                    <input x-model="employerContribution" type="number" id="employerContribution" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0" aria-label="Enter employer HSA contribution amount">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="currentBalance" class="block text-sm font-medium text-gray-700 mb-1">Current HSA Balance ($)</label>
+                    <input x-model="currentBalance" type="number" id="currentBalance" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0" aria-label="Enter your current HSA balance">
+                </div>
+                <div>
+                    <label for="investmentReturn" class="block text-sm font-medium text-gray-700 mb-1">Estimated Annual Return (%)</label>
+                    <input x-model="investmentReturn" type="number" step="0.1" id="investmentReturn" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="5.0" aria-label="Enter estimated annual investment return rate">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label for="years" class="block text-sm font-medium text-gray-700 mb-1">Years to Project</label>
+                    <input x-model="years" type="number" id="years" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="10" min="1" max="30" aria-label="Enter number of years to project">
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200" aria-label="Calculate HSA growth projection">
+                Calculate HSA Growth
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4" role="alert">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Your HSA Projection Results</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Annual Contribution Limit: <span class="font-bold" x-text="result.limit"></span></p>
+                            <p>Your Total Annual Contribution: <span class="font-bold" x-text="result.totalContribution"></span></p>
+                            <p>Remaining Contribution Space: <span class="font-bold" x-text="result.remainingSpace"></span></p>
+                            <p>Projected Balance in <span x-text="years"></span> years: <span class="font-bold" x-text="result.futureValue"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4" role="alert">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-red-800">Calculation Error</h2>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="result !== null" class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <caption class="sr-only">Year-by-year HSA growth projection</caption>
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contributions</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Growth</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <template x-for="(year, index) in result.yearlyProjections" :key="index">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="year.year"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="'$' + year.contributions.toLocaleString()"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="'$' + year.growth.toLocaleString()"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="'$' + year.balance.toLocaleString()"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">Maximizing Your Health Savings Account (HSA) Benefits</h2>
+            <p class="text-gray-600 mb-4">A Health Savings Account (HSA) is the most tax-advantaged account available when paired with a High-Deductible Health Plan (HDHP). Our calculator helps you project growth and optimize contributions to build long-term healthcare savings.</p>
+            
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Why HSAs Are Powerful Savings Tools:</h3>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li>• <strong>Triple tax advantage</strong>: Contributions are pre-tax, growth is tax-free, and withdrawals for medical expenses are tax-free</li>
+                    <li>• <strong>Portable</strong>: Your HSA stays with you even if you change jobs or health plans</li>
+                    <li>• <strong>Investment opportunities</strong>: Most HSAs allow you to invest funds once you reach a minimum balance</li>
+                    <li>• <strong>Retirement benefits</strong>: After age 65, funds can be withdrawn for any purpose (medical expenses remain tax-free)</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">2023-2024 HSA Contribution Limits:</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-600">2023 Limits</h4>
+                        <ul class="mt-1 space-y-1 text-sm text-gray-600">
+                            <li>• Individual: $3,850</li>
+                            <li>• Family: $7,750</li>
+                            <li>• Catch-up (55+): +$1,000</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-600">2024 Limits</h4>
+                        <ul class="mt-1 space-y-1 text-sm text-gray-600">
+                            <li>• Individual: $4,150</li>
+                            <li>• Family: $8,300</li>
+                            <li>• Catch-up (55+): +$1,000</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="mt-2 text-xs text-gray-500">Note: Contribution limits are set annually by the IRS and may change.</p>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">HSA-Eligible Expenses:</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
+                    <div>
+                        <h4 class="font-medium text-gray-700 mb-1">Common Medical Expenses</h4>
+                        <ul class="space-y-1">
+                            <li>• Doctor and specialist visits</li>
+                            <li>• Prescription medications</li>
+                            <li>• Dental treatments</li>
+                            <li>• Vision exams and glasses</li>
+                            <li>• Hospital services</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-700 mb-1">Often Overlooked Expenses</h4>
+                        <ul class="space-y-1">
+                            <li>• Menstrual care products</li>
+                            <li>• Sunscreen (SPF 15+)</li>
+                            <li>• Breast pumps and supplies</li>
+                            <li>• COVID-19 tests and PPE</li>
+                            <li>• Acupuncture treatments</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mt-6">
+                <h3 class="font-medium text-gray-700 mb-2">HSA vs. FSA: Key Differences</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Feature</th>
+                                <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">HSA</th>
+                                <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">FSA</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-600">Requires HDHP?</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-600">Yes</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-600">No</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-600">Funds Roll Over?</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-600">Yes</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-600">Limited</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-600">Portable?</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-600">Yes</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-600">No</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-600">Investment Options?</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-600">Yes</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-600">No</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </article>
+    </div>
+</div>
+
+<script>
+    function hsaCalculator() {
+        return {
+            filingStatus: 'single',
+            year: '2024',
+            annualContribution: null,
+            employerContribution: null,
+            currentBalance: null,
+            investmentReturn: 5.0,
+            years: 10,
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                // Validate inputs
+                if (!this.annualContribution || this.annualContribution < 0) {
+                    this.error = 'Please enter a valid annual contribution';
+                    return;
+                }
+                
+                if (!this.employerContribution || this.employerContribution < 0) {
+                    this.error = 'Please enter a valid employer contribution';
+                    return;
+                }
+                
+                if (!this.currentBalance || this.currentBalance < 0) {
+                    this.error = 'Please enter a valid current balance';
+                    return;
+                }
+                
+                if (!this.investmentReturn || this.investmentReturn < 0) {
+                    this.error = 'Please enter a valid investment return rate';
+                    return;
+                }
+                
+                if (!this.years || this.years < 1 || this.years > 30) {
+                    this.error = 'Please enter a valid number of years (1-30)';
+                    return;
+                }
+                
+                // Get contribution limits based on year and filing status
+                let limit = 0;
+                if (this.year === '2023') {
+                    limit = this.filingStatus === 'single' ? 3850 : 7750;
+                } else { // 2024
+                    limit = this.filingStatus === 'single' ? 4150 : 8300;
+                }
+                
+                const totalContribution = parseFloat(this.annualContribution) + parseFloat(this.employerContribution);
+                const remainingSpace = Math.max(0, limit - totalContribution);
+                
+                // Calculate future value
+                let balance = parseFloat(this.currentBalance);
+                const yearlyReturn = parseFloat(this.investmentReturn) / 100;
+                const yearlyProjections = [];
+                
+                for (let i = 1; i <= this.years; i++) {
+                    const contributions = parseFloat(this.annualContribution) + parseFloat(this.employerContribution);
+                    const startBalance = balance;
+                    const growth = (startBalance + contributions) * yearlyReturn;
+                    balance = startBalance + contributions + growth;
+                    
+                    yearlyProjections.push({
+                        year: i,
+                        contributions: Math.round(contributions * 100) / 100,
+                        growth: Math.round(growth * 100) / 100,
+                        balance: Math.round(balance * 100) / 100
+                    });
+                }
+                
+                this.result = {
+                    limit: '$' + limit.toLocaleString(),
+                    totalContribution: '$' + totalContribution.toLocaleString(),
+                    remainingSpace: '$' + remainingSpace.toLocaleString(),
+                    futureValue: '$' + Math.round(balance * 100) / 100,
+                    yearlyProjections: yearlyProjections
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

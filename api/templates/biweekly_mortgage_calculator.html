@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}Biweekly Mortgage Calculator - Save Thousands & Pay Off Faster{% endblock %}
+
+{% block meta_description %}Use our free biweekly mortgage calculator to see how making payments every 2 weeks can help you pay off your home loan faster and save thousands in interest. Compare monthly vs biweekly payment options.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Biweekly Mortgage Calculator</h1>
+        
+        <div x-data="biweeklyMortgageCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="loanAmount" class="block text-sm font-medium text-gray-700 mb-1">Loan Amount ($)</label>
+                    <input x-model="loanAmount" type="number" id="loanAmount" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="300,000">
+                </div>
+                <div>
+                    <label for="interestRate" class="block text-sm font-medium text-gray-700 mb-1">Interest Rate (%)</label>
+                    <input x-model="interestRate" type="number" step="0.01" id="interestRate" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="5.25">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="loanTerm" class="block text-sm font-medium text-gray-700 mb-1">Loan Term (years)</label>
+                    <select x-model="loanTerm" id="loanTerm" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="10">10 years</option>
+                        <option value="15">15 years</option>
+                        <option value="20">20 years</option>
+                        <option value="30" selected>30 years</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                    <input x-model="startDate" type="date" id="startDate" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                </div>
+            </div>
+
+            <div class="flex items-center">
+                <input x-model="includeAmortization" id="includeAmortization" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                <label for="includeAmortization" class="ml-2 block text-sm text-gray-700">Show Amortization Schedule</label>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate Biweekly Payments
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Biweekly Mortgage Payment Results</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Monthly Payment: <span class="font-bold" x-text="'$' + result.monthlyPayment.toLocaleString('en-US', {maximumFractionDigits: 2})"></span></p>
+                            <p>Biweekly Payment: <span class="font-bold" x-text="'$' + result.biweeklyPayment.toLocaleString('en-US', {maximumFractionDigits: 2})"></span></p>
+                            <p>Total Interest (Monthly): <span class="font-bold" x-text="'$' + result.totalInterestMonthly.toLocaleString('en-US', {maximumFractionDigits: 2})"></span></p>
+                            <p>Total Interest (Biweekly): <span class="font-bold" x-text="'$' + result.totalInterestBiweekly.toLocaleString('en-US', {maximumFractionDigits: 2})"></span></p>
+                            <p>Interest Savings: <span class="font-bold" x-text="'$' + result.interestSavings.toLocaleString('en-US', {maximumFractionDigits: 2})"></span></p>
+                            <p>Loan Payoff Time: <span class="font-bold" x-text="result.payoffYears + ' years, ' + result.payoffMonths + ' months'"></span></p>
+                            <p>Payoff Date: <span class="font-bold" x-text="result.payoffDate"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-800">Error</h3>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="result !== null && includeAmortization" x-transition class="overflow-x-auto">
+                <h3 class="text-lg font-medium text-gray-800 mb-2">Amortization Schedule (First 12 Months)</h3>
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment #</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Principal</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Interest</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <template x-for="(payment, index) in result.amortizationSchedule.slice(0, 12)" :key="index">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="payment.paymentNumber"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="payment.paymentDate"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="'$' + payment.payment.toLocaleString('en-US', {maximumFractionDigits: 2})"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="'$' + payment.principal.toLocaleString('en-US', {maximumFractionDigits: 2})"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="'$' + payment.interest.toLocaleString('en-US', {maximumFractionDigits: 2})"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="'$' + payment.balance.toLocaleString('en-US', {maximumFractionDigits: 2})"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">How Biweekly Mortgage Payments Work to Save You Money</h2>
+            <p class="text-gray-600 mb-4">Making biweekly mortgage payments is a powerful strategy that can help homeowners pay off their loans faster and save thousands in interest. Our biweekly mortgage calculator shows you exactly how much you can save by switching from traditional monthly payments to a biweekly schedule.</p>
+            
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-blue-800 mb-2">Standard Monthly Mortgage Payments</h3>
+                    <ul class="space-y-1 text-sm text-gray-600">
+                        <li>• 12 payments per year (1 payment each month)</li>
+                        <li>• Each payment = 1/12 of annual amount</li>
+                        <li>• More interest accumulates over the loan term</li>
+                        <li>• Standard for most 30-year fixed mortgages</li>
+                    </ul>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-green-800 mb-2">Biweekly Mortgage Payment Advantages</h3>
+                    <ul class="space-y-1 text-sm text-gray-600">
+                        <li>• 26 payments per year (every 2 weeks)</li>
+                        <li>• Each payment = half of your monthly amount</li>
+                        <li>• Equivalent to making 13 monthly payments each year</li>
+                        <li>• Reduces principal faster, saving on interest</li>
+                        <li>• Shortens loan term by several years</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h3 class="font-medium text-gray-700 mb-2">Example Savings from Biweekly Payments:</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loan Amount</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Interest Rate</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Term</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Interest Saved</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Saved</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$300,000</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">4.5%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">30 years</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$62,283</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">5 years 8 months</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$200,000</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">3.75%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">30 years</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$37,890</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">5 years 4 months</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$400,000</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">5.0%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">30 years</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$83,456</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">6 years 2 months</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="mt-6 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Important Considerations for Biweekly Mortgage Payments:</h3>
+                <ul class="list-disc list-inside space-y-2 text-sm text-gray-600">
+                    <li><strong>Lender policies vary</strong> - Some mortgage servicers offer formal biweekly payment programs (sometimes with setup fees)</li>
+                    <li><strong>DIY option</strong> - You can simulate biweekly payments by making half-payments every 2 weeks without lender involvement</li>
+                    <li><strong>Alternative strategy</strong> - Making one extra monthly payment each year provides similar benefits to biweekly payments</li>
+                    <li><strong>Savings potential</strong> - The higher your interest rate and the longer your loan term, the more you'll save with biweekly payments</li>
+                    <li><strong>Budget impact</strong> - Biweekly payments spread costs more evenly through the month for easier budgeting</li>
+                </ul>
+            </section>
+
+            <section class="mt-6">
+                <h3 class="font-medium text-gray-700 mb-2">Frequently Asked Questions</h3>
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-medium text-gray-600">Is there a fee for biweekly mortgage payments?</h4>
+                        <p class="text-sm text-gray-500 mt-1">Some lenders charge setup or processing fees for formal biweekly programs. You can avoid fees by managing biweekly payments yourself through your bank's bill pay system.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-600">How much can I save with biweekly payments?</h4>
+                        <p class="text-sm text-gray-500 mt-1">Savings depend on your loan amount, interest rate, and term. For a typical 30-year mortgage, biweekly payments can save $30,000-$80,000 in interest and shorten the loan by 4-8 years.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-600">Can I switch to biweekly payments anytime?</h4>
+                        <p class="text-sm text-gray-500 mt-1">Yes, you can start biweekly payments at any point in your mortgage term. The earlier you start, the more you'll save.</p>
+                    </div>
+                </div>
+            </section>
+        </article>
+    </div>
+</div>
+
+<script>
+    function biweeklyMortgageCalculator() {
+        return {
+            loanAmount: 300000,
+            interestRate: 5.25,
+            loanTerm: 30,
+            startDate: new Date().toISOString().split('T')[0],
+            includeAmortization: false,
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                // Validate inputs
+                if (!this.loanAmount || !this.interestRate || !this.loanTerm) {
+                    this.error = 'Please fill in all required fields';
+                    return;
+                }
+                
+                if (this.loanAmount <= 0 || this.interestRate <= 0 || this.loanTerm <= 0) {
+                    this.error = 'All values must be greater than zero';
+                    return;
+                }
+                
+                // Calculate monthly payment
+                const principal = parseFloat(this.loanAmount);
+                const rate = parseFloat(this.interestRate) / 100 / 12;
+                const payments = parseFloat(this.loanTerm) * 12;
+                
+                const monthlyPayment = principal * rate * Math.pow(1 + rate, payments) / (Math.pow(1 + rate, payments) - 1);
+                
+                // Calculate biweekly payment (half of monthly)
+                const biweeklyPayment = monthlyPayment / 2;
+                
+                // Calculate total interest for monthly payments
+                const totalInterestMonthly = (monthlyPayment * payments) - principal;
+                
+                // Calculate biweekly amortization
+                const biweeklyResults = this.calculateBiweeklyAmortization(
+                    principal,
+                    rate,
+                    biweeklyPayment,
+                    this.startDate
+                );
+                
+                this.result = {
+                    monthlyPayment: monthlyPayment,
+                    biweeklyPayment: biweeklyPayment,
+                    totalInterestMonthly: totalInterestMonthly,
+                    totalInterestBiweekly: biweeklyResults.totalInterest,
+                    interestSavings: totalInterestMonthly - biweeklyResults.totalInterest,
+                    payoffYears: biweeklyResults.years,
+                    payoffMonths: biweeklyResults.months,
+                    payoffDate: biweeklyResults.payoffDate,
+                    amortizationSchedule: biweeklyResults.schedule
+                };
+            },
+            
+            calculateBiweeklyAmortization(principal, monthlyRate, payment, startDate) {
+                let balance = principal;
+                let totalInterest = 0;
+                let paymentNumber = 0;
+                let currentDate = new Date(startDate);
+                const schedule = [];
+                
+                // Adjust rate for biweekly (convert monthly rate to biweekly)
+                const biweeklyRate = Math.pow(1 + monthlyRate, 14/30.436875) - 1;
+                
+                while (balance > 0 && paymentNumber < 1000) {
+                    paymentNumber++;
+                    
+                    // Calculate interest for this period
+                    const interest = balance * biweeklyRate;
+                    totalInterest += interest;
+                    
+                    // Calculate principal payment
+                    const principalPayment = Math.min(payment - interest, balance);
+                    
+                    // Update balance
+                    balance -= principalPayment;
+                    
+                    // Add to schedule if within first year
+                    if (paymentNumber <= 26) {
+                        schedule.push({
+                            paymentNumber: paymentNumber,
+                            paymentDate: currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                            payment: payment,
+                            principal: principalPayment,
+                            interest: interest,
+                            balance: Math.max(0, balance)
+                        });
+                    }
+                    
+                    // Move to next biweekly date
+                    currentDate = new Date(currentDate.setDate(currentDate.getDate() + 14));
+                    
+                    // If balance would go negative, adjust final payment
+                    if (balance < 0) {
+                        balance = 0;
+                    }
+                }
+                
+                // Calculate total time
+                const totalMonths = paymentNumber * 14 / 30.436875;
+                const years = Math.floor(totalMonths / 12);
+                const months = Math.round(totalMonths % 12);
+                
+                return {
+                    totalInterest: totalInterest,
+                    years: years,
+                    months: months,
+                    payoffDate: currentDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+                    schedule: schedule
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

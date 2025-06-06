@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}0-60 MPH Calculator - Estimate Your Car's Acceleration Time{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Free online 0-60 MPH calculator. Estimate your vehicle's acceleration time based on weight, horsepower, drivetrain, and traction conditions. Get instant results!">
+<meta name="keywords" content="0-60 calculator, car acceleration, mph calculator, vehicle performance, horsepower calculator, car speed calculator">
+<meta property="og:title" content="0-60 MPH Calculator - Estimate Your Car's Acceleration Time">
+<meta property="og:description" content="Free online tool to calculate your vehicle's 0-60 MPH time based on weight, horsepower, and drivetrain type.">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <article class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">0-60 MPH Calculator</h1>
+        
+        <section x-data="zeroToSixtyCalculator()" class="space-y-6">
+            <p class="text-gray-600 mb-4">Use this calculator to estimate your vehicle's 0-60 mph acceleration time based on key performance factors.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">Vehicle Weight (lbs)</label>
+                    <input x-model="weight" type="number" id="weight" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 3500">
+                </div>
+                <div>
+                    <label for="horsepower" class="block text-sm font-medium text-gray-700 mb-1">Engine Horsepower</label>
+                    <input x-model="horsepower" type="number" id="horsepower" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 300">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="driveType" class="block text-sm font-medium text-gray-700 mb-1">Drive Type</label>
+                    <select x-model="driveType" id="driveType" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="1">Front-Wheel Drive</option>
+                        <option value="0.9">Rear-Wheel Drive</option>
+                        <option value="0.8">All-Wheel Drive</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="traction" class="block text-sm font-medium text-gray-700 mb-1">Traction Condition</label>
+                    <select x-model="traction" id="traction" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="1">Average</option>
+                        <option value="1.1">Poor (wet/slippery)</option>
+                        <option value="0.9">Excellent (sticky tires)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate 0-60 Time
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Estimated 0-60 MPH Time</h2>
+                        <div class="mt-1 text-green-700">
+                            <p><span class="font-bold text-2xl" x-text="result.time"></span> seconds</p>
+                            <p class="mt-2 text-sm">Power-to-weight ratio: <span x-text="result.powerToWeight"></span> hp/lb</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-red-800">Error</h2>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </article>
+
+    <article class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <h2 class="text-xl font-semibold text-dark mb-4">About the 0-60 MPH Calculator</h2>
+        <p class="text-gray-600 mb-4">Our free 0-60 mph calculator provides accurate estimates of a vehicle's acceleration time based on power-to-weight ratio and drivetrain efficiency. Whether you're comparing cars or tuning your vehicle, this tool helps you understand potential performance.</p>
+        
+        <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">How the 0-60 Calculation Works:</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+                <li>• Uses physics-based formulas considering weight, power, and drivetrain efficiency</li>
+                <li>• Accounts for different drive types (FWD, RWD, AWD) and their power transfer characteristics</li>
+                <li>• Adjusts for traction conditions that affect real-world performance</li>
+                <li>• Results are estimates - actual 0-60 times may vary based on gearing, torque curve, and other factors</li>
+            </ul>
+        </section>
+
+        <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">Typical 0-60 MPH Times for Reference:</h3>
+            <ul class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                <li>• Economy cars: 8-10 seconds</li>
+                <li>• Family sedans: 7-9 seconds</li>
+                <li>• Sports sedans: 5-7 seconds</li>
+                <li>• Performance cars: 3-5 seconds</li>
+                <li>• Supercars: under 3 seconds</li>
+                <li>• Electric vehicles: often 2-4 seconds</li>
+            </ul>
+        </section>
+
+        <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">Factors Affecting 0-60 Times:</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+                <li>• <strong>Weight:</strong> Lighter vehicles accelerate faster with the same power</li>
+                <li>• <strong>Horsepower:</strong> More power means faster acceleration (to a point)</li>
+                <li>• <strong>Drivetrain:</strong> AWD provides better launch traction than RWD or FWD</li>
+                <li>• <strong>Traction:</strong> Sticky tires or perfect conditions improve times</li>
+                <li>• <strong>Gearing:</strong> Proper gear ratios maximize acceleration</li>
+            </ul>
+        </section>
+    </article>
+</div>
+
+<script>
+    function zeroToSixtyCalculator() {
+        return {
+            weight: null,
+            horsepower: null,
+            driveType: '1',
+            traction: '1',
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                if (!this.weight || !this.horsepower) {
+                    this.error = 'Please enter both weight and horsepower';
+                    return;
+                }
+                
+                if (this.weight <= 0 || this.horsepower <= 0) {
+                    this.error = 'Weight and horsepower must be greater than zero';
+                    return;
+                }
+                
+                // Calculate power-to-weight ratio (hp per pound)
+                const powerToWeight = this.horsepower / this.weight;
+                
+                // Base time calculation (simplified physics model)
+                let baseTime = 6.1 * Math.pow(powerToWeight, -0.68);
+                
+                // Adjust for drive type and traction
+                const efficiencyFactor = parseFloat(this.driveType) * parseFloat(this.traction);
+                baseTime = baseTime / efficiencyFactor;
+                
+                // Ensure reasonable bounds
+                baseTime = Math.max(1.5, Math.min(20, baseTime));
+                
+                this.result = {
+                    time: baseTime.toFixed(2),
+                    powerToWeight: (powerToWeight * 1000).toFixed(3) + " hp per 1000 lbs"
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

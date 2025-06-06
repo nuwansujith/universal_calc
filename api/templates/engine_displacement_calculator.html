@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Engine Displacement Calculator - Calculate CC, Liters & Cubic Inches{% endblock %}
+
+{% block meta_description %}Free online engine displacement calculator. Compute total displacement in cc, liters, or cubic inches using bore, stroke & cylinder count. Essential tool for automotive enthusiasts and mechanics.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Engine Displacement Calculator</h1>
+        
+        <div x-data="displacementCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="bore" class="block text-sm font-medium text-gray-700 mb-1">Bore Diameter (inches)</label>
+                    <input x-model="bore" type="number" step="0.01" id="bore" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 3.5">
+                </div>
+                <div>
+                    <label for="stroke" class="block text-sm font-medium text-gray-700 mb-1">Stroke Length (inches)</label>
+                    <input x-model="stroke" type="number" step="0.01" id="stroke" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 3.25">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="cylinders" class="block text-sm font-medium text-gray-700 mb-1">Number of Cylinders</label>
+                    <input x-model="cylinders" type="number" id="cylinders" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 8" min="1" max="16">
+                </div>
+                <div>
+                    <label for="unit" class="block text-sm font-medium text-gray-700 mb-1">Output Unit</label>
+                    <select x-model="unit" id="unit" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="cubicInches">Cubic Inches (ci)</option>
+                        <option value="liters">Liters (L)</option>
+                        <option value="cc">Cubic Centimeters (cc)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate Engine Displacement
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Engine Displacement Results</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Total Displacement: <span class="font-bold" x-text="result.displacement"></span> <span x-text="result.unit"></span></p>
+                            <p>Displacement per Cylinder: <span class="font-bold" x-text="result.perCylinder"></span> <span x-text="result.unit"></span></p>
+                            <p>Bore/Stroke Ratio: <span class="font-bold" x-text="result.boreStrokeRatio"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-800">Calculation Error</h3>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">Understanding Engine Displacement</h2>
+            <p class="text-gray-600 mb-4">Engine displacement, measured in cubic centimeters (cc), liters (L), or cubic inches (ci), represents the total volume of all cylinders in an internal combustion engine. Our calculator helps automotive enthusiasts, mechanics, and engineers quickly determine this crucial specification using bore diameter, stroke length, and cylinder count.</p>
+            
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Engine Displacement Formula</h3>
+                <p class="text-sm text-gray-600 mb-2">The standard formula for calculating engine displacement is:</p>
+                <p class="text-sm font-mono bg-gray-100 p-2 rounded mb-2">Displacement = (π/4) × Bore² × Stroke × Number of Cylinders</p>
+                <p class="text-sm text-gray-600">Where:</p>
+                <ul class="text-sm text-gray-600 ml-4 list-disc">
+                    <li>π/4 ≈ 0.7854 (constant for circular area calculation)</li>
+                    <li>Bore = cylinder diameter in inches</li>
+                    <li>Stroke = piston travel distance in inches</li>
+                    <li>Number of Cylinders = total combustion chambers</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Measurement Conversions</h3>
+                <p class="text-sm text-gray-600 mb-2">Our calculator automatically converts between common displacement units:</p>
+                <ul class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                    <li>• 1 Liter = 61.0237 cubic inches</li>
+                    <li>• 1 Liter = 1000 cubic centimeters</li>
+                    <li>• 1 Cubic inch = 16.3871 cc</li>
+                    <li>• 1000 cc = 1 Liter</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Common Engine Sizes</h3>
+                <p class="text-sm text-gray-600 mb-2">Engine displacement varies by vehicle type and purpose:</p>
+                <ul class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                    <li>• Compact cars: 1.0-1.6L (61-98 ci)</li>
+                    <li>• Sedans: 1.8-2.5L (110-153 ci)</li>
+                    <li>• Sports cars: 3.0-6.2L (183-378 ci)</li>
+                    <li>• Trucks/SUVs: 4.0-6.7L (244-409 ci)</li>
+                    <li>• Classic muscle: 5.0-7.0L (305-427 ci)</li>
+                    <li>• Motorcycles: 250-1800cc</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Bore/Stroke Ratio Explained</h3>
+                <p class="text-sm text-gray-600">The bore/stroke ratio significantly impacts engine performance characteristics:</p>
+                <ul class="text-sm text-gray-600 ml-4 list-disc">
+                    <li><strong>Under-square (ratio < 1)</strong>: Longer stroke favors low-end torque (common in trucks)</li>
+                    <li><strong>Square (ratio = 1)</strong>: Balanced design for versatile performance</li>
+                    <li><strong>Over-square (ratio > 1)</strong>: Larger bore enables higher RPM (typical in sports cars)</li>
+                </ul>
+                <p class="text-sm text-gray-600 mt-2">Our calculator automatically computes this ratio to help you understand your engine's design characteristics.</p>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Practical Applications</h3>
+                <p class="text-sm text-gray-600">Knowing your engine's displacement is essential for:</p>
+                <ul class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                    <li>• Engine rebuilding projects</li>
+                    <li>• Performance modifications</li>
+                    <li>• Vehicle classification</li>
+                    <li>• Emissions compliance</li>
+                    <li>• Parts compatibility</li>
+                    <li>• Racing regulations</li>
+                    <li>• Fuel system tuning</li>
+                    <li>• Insurance purposes</li>
+                </ul>
+            </section>
+        </article>
+    </div>
+</div>
+
+<script>
+    function displacementCalculator() {
+        return {
+            bore: null,
+            stroke: null,
+            cylinders: 4,
+            unit: 'cubicInches',
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                if (!this.bore || !this.stroke || !this.cylinders) {
+                    this.error = 'Please fill in all required fields';
+                    return;
+                }
+                
+                if (this.bore <= 0 || this.stroke <= 0 || this.cylinders <= 0) {
+                    this.error = 'All values must be greater than zero';
+                    return;
+                }
+                
+                // Calculate displacement in cubic inches
+                const cubicInches = 0.7854 * Math.pow(this.bore, 2) * this.stroke * this.cylinders;
+                
+                // Convert to selected unit
+                let displacement, unitLabel;
+                switch(this.unit) {
+                    case 'liters':
+                        displacement = cubicInches / 61.0237;
+                        unitLabel = 'L';
+                        break;
+                    case 'cc':
+                        displacement = cubicInches * 16.3871;
+                        unitLabel = 'cc';
+                        break;
+                    default: // cubicInches
+                        displacement = cubicInches;
+                        unitLabel = 'ci';
+                }
+                
+                // Calculate per cylinder displacement
+                const perCylinder = displacement / this.cylinders;
+                
+                // Calculate bore/stroke ratio
+                const boreStrokeRatio = (this.bore / this.stroke).toFixed(2);
+                
+                this.result = {
+                    displacement: displacement.toFixed(1),
+                    perCylinder: perCylinder.toFixed(1),
+                    boreStrokeRatio: boreStrokeRatio,
+                    unit: unitLabel
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

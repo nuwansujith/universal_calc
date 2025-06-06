@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}LSAC GPA Calculator | Accurate Law School GPA Predictor{% endblock %}
+
+{% block meta_description %}Calculate your LSAC GPA for law school applications with our precise calculator. Input your courses, credits, and grades to determine your GPA on the LSAC 4.33 scale.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto p-4">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">LSAC GPA Calculator for Law School Applications</h1>
+        
+        <div x-data="lsacGpaCalculator()" class="space-y-6">
+            <!-- Course Input Section -->
+            <div class="bg-blue-50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-blue-800 mb-3">Add Your Courses</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="md:col-span-2">
+                        <label for="courseName" class="block text-sm font-medium text-gray-700 mb-1">Course Name (Optional)</label>
+                        <input id="courseName" x-model="newCourse.name" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Biology 101" aria-label="Course name">
+                    </div>
+                    <div>
+                        <label for="courseCredits" class="block text-sm font-medium text-gray-700 mb-1">Credits</label>
+                        <input id="courseCredits" x-model="newCourse.credits" type="number" min="0" step="0.1" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 3.0" aria-label="Course credits">
+                    </div>
+                    <div>
+                        <label for="courseGrade" class="block text-sm font-medium text-gray-700 mb-1">Grade</label>
+                        <select id="courseGrade" x-model="newCourse.grade" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" aria-label="Course grade">
+                            <option value="A+">A+ (4.33)</option>
+                            <option value="A">A (4.0)</option>
+                            <option value="A-">A- (3.67)</option>
+                            <option value="B+">B+ (3.33)</option>
+                            <option value="B">B (3.0)</option>
+                            <option value="B-">B- (2.67)</option>
+                            <option value="C+">C+ (2.33)</option>
+                            <option value="C">C (2.0)</option>
+                            <option value="C-">C- (1.67)</option>
+                            <option value="D+">D+ (1.33)</option>
+                            <option value="D">D (1.0)</option>
+                            <option value="D-">D- (0.67)</option>
+                            <option value="F">F (0.0)</option>
+                        </select>
+                    </div>
+                </div>
+                <button @click="addCourse()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200">
+                    Add Course to GPA Calculation
+                </button>
+            </div>
+
+            <!-- Course List -->
+            <div class="bg-green-50 p-4 rounded-lg" x-show="courses.length > 0">
+                <h2 class="text-lg font-semibold text-green-800 mb-3">Your Course List</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                                <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Credits</th>
+                                <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                                <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade Points</th>
+                                <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <template x-for="(course, index) in courses" :key="index">
+                                <tr>
+                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500" x-text="course.name || 'Unnamed Course'"></td>
+                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500" x-text="course.credits"></td>
+                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500" x-text="course.grade"></td>
+                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500" x-text="getGradePoints(course.grade)"></td>
+                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                        <button @click="removeCourse(index)" class="text-red-600 hover:text-red-900" aria-label="Remove course">Remove</button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Calculate Button -->
+            <button @click="calculateGPA()" x-show="courses.length > 0" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate My LSAC GPA
+            </button>
+
+            <!-- Results -->
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Your LSAC GPA Results</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Total Credits: <span class="font-bold" x-text="result.totalCredits"></span></p>
+                            <p>Total Grade Points: <span class="font-bold" x-text="result.totalGradePoints.toFixed(2)"></span></p>
+                            <p>LSAC GPA: <span class="font-bold" x-text="result.gpa.toFixed(2)"></span>/4.33</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Section -->
+    <article class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Understanding LSAC GPA Calculation</h2>
+        <p class="text-gray-600 mb-4">The Law School Admission Council (LSAC) calculates your GPA differently than your undergraduate institution. This standardized GPA is used by all American Bar Association-approved law schools.</p>
+        
+        <section>
+            <h3 class="font-semibold text-gray-700 mb-2">Key Features of LSAC GPA</h3>
+            <ul class="list-disc list-inside space-y-2 text-gray-600">
+                <li><strong>4.33 Scale:</strong> Unlike standard 4.0 scales, LSAC recognizes A+ as 4.33</li>
+                <li><strong>Comprehensive:</strong> Includes all undergraduate courses, even those excluded by your school</li>
+                <li><strong>No Replacement:</strong> All attempts of repeated courses are counted</li>
+                <li><strong>International Conversion:</strong> Foreign grades are converted to U.S. equivalents</li>
+            </ul>
+        </section>
+
+        <section class="mt-4">
+            <h3 class="font-semibold text-gray-700 mb-2">Why LSAC GPA Matters</h3>
+            <ul class="list-disc list-inside space-y-2 text-gray-600">
+                <li>Used by all ABA-approved law schools for admissions decisions</li>
+                <li>Provides standardized comparison between applicants</li>
+                <li>Combined with LSAT score forms the basis of your law school application profile</li>
+                <li>Determines eligibility for certain scholarships and programs</li>
+            </ul>
+        </section>
+
+        <p class="mt-4 text-sm text-gray-500">Note: This calculator provides an estimate. Your official LSAC GPA may vary slightly based on their specific evaluation of your transcripts.</p>
+    </article>
+</div>
+
+<script>
+    function lsacGpaCalculator() {
+        return {
+            newCourse: {
+                name: '',
+                credits: '',
+                grade: 'A'
+            },
+            courses: [],
+            result: null,
+            
+            getGradePoints(grade) {
+                const gradeMap = {
+                    'A+': 4.33,
+                    'A': 4.0,
+                    'A-': 3.67,
+                    'B+': 3.33,
+                    'B': 3.0,
+                    'B-': 2.67,
+                    'C+': 2.33,
+                    'C': 2.0,
+                    'C-': 1.67,
+                    'D+': 1.33,
+                    'D': 1.0,
+                    'D-': 0.67,
+                    'F': 0.0
+                };
+                return gradeMap[grade] || 0.0;
+            },
+            
+            addCourse() {
+                if (this.newCourse.credits && this.newCourse.grade) {
+                    this.courses.push({
+                        name: this.newCourse.name,
+                        credits: parseFloat(this.newCourse.credits),
+                        grade: this.newCourse.grade
+                    });
+                    this.newCourse.name = '';
+                    this.newCourse.credits = '';
+                    this.newCourse.grade = 'A';
+                }
+            },
+            
+            removeCourse(index) {
+                this.courses.splice(index, 1);
+                this.result = null;
+            },
+            
+            calculateGPA() {
+                let totalCredits = 0;
+                let totalGradePoints = 0;
+                
+                this.courses.forEach(course => {
+                    const gradePoints = this.getGradePoints(course.grade);
+                    totalCredits += course.credits;
+                    totalGradePoints += course.credits * gradePoints;
+                });
+                
+                const gpa = totalGradePoints / totalCredits;
+                
+                this.result = {
+                    totalCredits: totalCredits.toFixed(1),
+                    totalGradePoints: totalGradePoints,
+                    gpa: gpa
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

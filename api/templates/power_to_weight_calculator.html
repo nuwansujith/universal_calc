@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}Power-to-Weight Ratio Calculator | Calculate Vehicle Performance Metrics{% endblock %}
+
+{% block meta_description %}Calculate your vehicle's power-to-weight ratio to measure performance potential. Convert between hp/lb, kW/kg, and other units. Essential tool for car enthusiasts and engineers.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Power-to-Weight Ratio Calculator</h1>
+        
+        <div x-data="powerToWeightCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="power" class="block text-sm font-medium text-gray-700 mb-1">Power Output</label>
+                    <input x-model="power" type="number" step="0.1" id="power" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 300">
+                </div>
+                <div>
+                    <label for="powerUnit" class="block text-sm font-medium text-gray-700 mb-1">Power Unit</label>
+                    <select x-model="powerUnit" id="powerUnit" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="hp">Horsepower (hp)</option>
+                        <option value="kw">Kilowatts (kW)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">Weight</label>
+                    <input x-model="weight" type="number" step="0.1" id="weight" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 1500">
+                </div>
+                <div>
+                    <label for="weightUnit" class="block text-sm font-medium text-gray-700 mb-1">Weight Unit</label>
+                    <select x-model="weightUnit" id="weightUnit" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="lbs">Pounds (lbs)</option>
+                        <option value="kg">Kilograms (kg)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate Power-to-Weight Ratio
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Power-to-Weight Ratio Results</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Ratio: <span class="font-bold" x-text="result.ratio"></span> <span x-text="result.ratioUnit"></span></p>
+                            <p>Power: <span class="font-bold" x-text="result.power"></span> <span x-text="result.powerUnit"></span></p>
+                            <p>Weight: <span class="font-bold" x-text="result.weight"></span> <span x-text="result.weightUnit"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-800">Calculation Error</h3>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">Understanding Power-to-Weight Ratio for Vehicle Performance</h2>
+            <p class="text-gray-600 mb-4">The power-to-weight ratio is a crucial metric that measures a vehicle's performance potential by comparing its power output to its weight. This calculator helps automotive enthusiasts, engineers, and racers determine this important ratio in various units including hp/lb, hp/kg, and kW/kg.</p>
+            
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Power-to-Weight Ratio Formula:</h3>
+                <p class="text-sm text-gray-600 mb-2">The fundamental calculation is simple: <strong>Power-to-Weight Ratio = Power Output / Weight</strong></p>
+                <p class="text-sm text-gray-600">Common measurement units include:</p>
+                <ul class="text-sm text-gray-600 ml-4 list-disc">
+                    <li>hp/lb (horsepower per pound) - Common in US automotive measurements</li>
+                    <li>hp/kg (horsepower per kilogram) - Used in international motorsports</li>
+                    <li>kW/kg (kilowatt per kilogram) - Standard in engineering and European specifications</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Unit Conversion Reference:</h3>
+                <ul class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                    <li>• 1 horsepower (hp) = 0.7457 kilowatts (kW)</li>
+                    <li>• 1 kilowatt (kW) = 1.341 horsepower (hp)</li>
+                    <li>• 1 kilogram (kg) = 2.2046 pounds (lbs)</li>
+                    <li>• 1 pound (lb) = 0.4536 kilograms (kg)</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Vehicle Power-to-Weight Ratio Benchmarks:</h3>
+                <ul class="text-sm text-gray-600 space-y-2">
+                    <li><strong>Economy cars:</strong> 0.03-0.06 hp/lb (0.07-0.13 kW/kg) - Focused on fuel efficiency</li>
+                    <li><strong>Sports cars:</strong> 0.08-0.12 hp/lb (0.18-0.26 kW/kg) - Balanced performance</li>
+                    <li><strong>Supercars:</strong> 0.15-0.20 hp/lb (0.33-0.44 kW/kg) - High-performance vehicles</li>
+                    <li><strong>Motorcycles:</strong> 0.20-0.30 hp/lb (0.44-0.66 kW/kg) - Lightweight advantage</li>
+                    <li><strong>Formula 1 cars:</strong> 0.50+ hp/lb (1.10+ kW/kg) - Peak racing performance</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">How Power-to-Weight Ratio Affects Performance:</h3>
+                <p class="text-sm text-gray-600">A higher power-to-weight ratio directly impacts several key performance factors:</p>
+                <ul class="text-sm text-gray-600 ml-4 list-disc">
+                    <li><strong>Acceleration:</strong> Higher ratios enable faster 0-60 mph times</li>
+                    <li><strong>Top speed:</strong> Increases maximum velocity potential</li>
+                    <li><strong>Hill climbing:</strong> Improves ability to maintain speed on inclines</li>
+                    <li><strong>Responsiveness:</strong> Creates more immediate throttle response</li>
+                    <li><strong>Braking:</strong> Lighter vehicles can stop more quickly (when combined with proper brakes)</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Optimizing Your Power-to-Weight Ratio:</h3>
+                <p class="text-sm text-gray-600 mb-2">There are two ways to improve your power-to-weight ratio:</p>
+                <ol class="text-sm text-gray-600 ml-4 list-decimal">
+                    <li><strong>Increase power:</strong> Engine modifications, forced induction, or engine swaps</li>
+                    <li><strong>Reduce weight:</strong> Remove unnecessary components, use lightweight materials</li>
+                </ol>
+                <p class="text-sm text-gray-600 mt-2">Many performance builds focus on both strategies simultaneously for maximum effect.</p>
+            </section>
+        </article>
+    </div>
+</div>
+
+<script>
+    function powerToWeightCalculator() {
+        return {
+            power: null,
+            powerUnit: 'hp',
+            weight: null,
+            weightUnit: 'lbs',
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                if (!this.power || !this.weight) {
+                    this.error = 'Please fill in all required fields';
+                    return;
+                }
+                
+                if (this.power <= 0 || this.weight <= 0) {
+                    this.error = 'Power and weight must be greater than zero';
+                    return;
+                }
+                
+                // Convert power to horsepower if needed
+                let powerHp = this.power;
+                if (this.powerUnit === 'kw') {
+                    powerHp = this.power * 1.341;
+                }
+                
+                // Convert weight to pounds if needed
+                let weightLbs = this.weight;
+                if (this.weightUnit === 'kg') {
+                    weightLbs = this.weight * 2.2046;
+                }
+                
+                // Calculate ratio in hp/lb
+                const ratioHpLb = powerHp / weightLbs;
+                
+                // Calculate ratio in kW/kg
+                const ratioKwKg = (powerHp * 0.7457) / (weightLbs * 0.4536);
+                
+                // Determine which unit to display based on user's power unit selection
+                let displayRatio, displayUnit;
+                if (this.powerUnit === 'hp') {
+                    displayRatio = ratioHpLb.toFixed(4);
+                    displayUnit = 'hp per lb';
+                } else {
+                    displayRatio = ratioKwKg.toFixed(4);
+                    displayUnit = 'kW per kg';
+                }
+                
+                this.result = {
+                    ratio: displayRatio,
+                    ratioUnit: displayUnit,
+                    power: this.power.toFixed(1),
+                    powerUnit: this.powerUnit === 'hp' ? 'hp' : 'kW',
+                    weight: this.weight.toFixed(1),
+                    weightUnit: this.weightUnit === 'lbs' ? 'lbs' : 'kg'
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

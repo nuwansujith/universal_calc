@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block title %}Colorado Paycheck Calculator 2023 | Accurate Take-Home Pay Estimate{% endblock %}
+
+{% block meta_description %}Free Colorado paycheck calculator that estimates your net pay after federal, state, and local taxes. Calculate your take-home pay based on Colorado's flat 4.55% income tax rate and other deductions.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Colorado Paycheck Calculator</h1>
+        
+        <div x-data="paycheckCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="grossPay" class="block text-sm font-medium text-gray-700 mb-1">Gross Pay ($)</label>
+                    <input x-model="grossPay" type="number" id="grossPay" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
+                </div>
+                <div>
+                    <label for="payFrequency" class="block text-sm font-medium text-gray-700 mb-1">Pay Frequency</label>
+                    <select x-model="payFrequency" id="payFrequency" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="weekly">Weekly</option>
+                        <option value="biweekly">Bi-Weekly</option>
+                        <option value="semimonthly">Semi-Monthly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="annually">Annually</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="federalFilingStatus" class="block text-sm font-medium text-gray-700 mb-1">Federal Filing Status</label>
+                    <select x-model="federalFilingStatus" id="federalFilingStatus" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="single">Single</option>
+                        <option value="married">Married Filing Jointly</option>
+                        <option value="head">Head of Household</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="federalAllowances" class="block text-sm font-medium text-gray-700 mb-1">Federal Allowances</label>
+                    <input x-model="federalAllowances" type="number" id="federalAllowances" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0" value="0">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="additionalWithholding" class="block text-sm font-medium text-gray-700 mb-1">Additional Withholding ($)</label>
+                    <input x-model="additionalWithholding" type="number" id="additionalWithholding" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00" value="0">
+                </div>
+                <div>
+                    <label for="localTax" class="block text-sm font-medium text-gray-700 mb-1">Local Tax Rate (%)</label>
+                    <input x-model="localTax" type="number" step="0.01" id="localTax" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00" value="0">
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate Paycheck
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Paycheck Details</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Gross Pay: <span class="font-bold" x-text="'$' + result.grossPay"></span></p>
+                            <p>Federal Tax: <span class="font-bold" x-text="'$' + result.federalTax"></span></p>
+                            <p>Colorado State Tax: <span class="font-bold" x-text="'$' + result.stateTax"></span></p>
+                            <p x-show="result.localTax > 0">Local Tax: <span class="font-bold" x-text="'$' + result.localTax"></span></p>
+                            <p>Social Security: <span class="font-bold" x-text="'$' + result.socialSecurity"></span></p>
+                            <p>Medicare: <span class="font-bold" x-text="'$' + result.medicare"></span></p>
+                            <p class="pt-2 border-t border-green-200">Net Pay: <span class="font-bold text-lg" x-text="'$' + result.netPay"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-800">Error</h3>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">Colorado Paycheck Calculator Information</h2>
+            <p class="text-gray-600 mb-4">Our Colorado paycheck calculator helps you estimate your take-home pay after all deductions, including Colorado's flat 4.55% state income tax, federal taxes, Social Security, Medicare, and any applicable local taxes.</p>
+            
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Colorado Tax Information (2023):</h3>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li>• <strong>State Income Tax</strong>: Flat 4.55% rate (one of the lowest flat rates in the U.S.)</li>
+                    <li>• <strong>Local Taxes</strong>: Some municipalities like Denver have additional local taxes</li>
+                    <li>• <strong>Social Security</strong>: 6.2% on income up to $160,200</li>
+                    <li>• <strong>Medicare</strong>: 1.45% on all income (2.35% over $200,000 for single filers)</li>
+                    <li>• <strong>Federal Tax</strong>: Calculated based on your filing status and income level</li>
+                </ul>
+            </section>
+            
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">How to Calculate Your Colorado Paycheck:</h3>
+                <ol class="list-decimal list-inside space-y-2 text-sm text-gray-600">
+                    <li>Enter your gross pay amount (before any deductions)</li>
+                    <li>Select your pay frequency (weekly, bi-weekly, etc.)</li>
+                    <li>Choose your federal filing status (affects your tax brackets)</li>
+                    <li>Enter federal allowances (from your W-4 form)</li>
+                    <li>Add any additional withholding if you request extra taxes be taken out</li>
+                    <li>Enter local tax rate if your Colorado municipality has one</li>
+                </ol>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Colorado-Specific Paycheck Notes:</h3>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li>• Colorado has a simple <strong>flat tax rate of 4.55%</strong> for all income levels</li>
+                    <li>• <strong>Denver</strong> has a local occupational privilege tax of $5.75 per month for employees</li>
+                    <li>• Some cities like <strong>Aurora and Greenwood Village</strong> have additional local taxes</li>
+                    <li>• Colorado allows deductions for <strong>retirement contributions</strong> and other items</li>
+                    <li>• No county or city income taxes except for specific local taxes mentioned above</li>
+                </ul>
+            </section>
+
+            <section class="mt-4">
+                <h3 class="font-medium text-gray-700 mb-2">Frequently Asked Questions</h3>
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-medium text-gray-700">How accurate is this Colorado paycheck calculator?</h4>
+                        <p class="text-sm text-gray-600 mt-1">Our calculator provides estimates based on Colorado's flat tax rate and current federal tax brackets. For precise figures, consult with a tax professional or your payroll department.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-700">Does Colorado have local income taxes?</h4>
+                        <p class="text-sm text-gray-600 mt-1">Most of Colorado doesn't have local income taxes, but some municipalities like Denver have small occupational privilege taxes that our calculator can account for if you enter the rate.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-700">Why is Colorado state tax a flat rate?</h4>
+                        <p class="text-sm text-gray-600 mt-1">Colorado voters approved a flat tax system (Taxpayer's Bill of Rights or TABOR) that applies the same 4.55% rate to all income levels, making tax calculations simpler than progressive systems.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-700">When are Colorado state taxes due?</h4>
+                        <p class="text-sm text-gray-600 mt-1">Colorado state income taxes are due April 15th each year, the same as federal taxes. Employers withhold Colorado taxes from each paycheck automatically.</p>
+                    </div>
+                </div>
+            </section>
+        </article>
+    </div>
+</div>
+
+<script>
+    function paycheckCalculator() {
+        return {
+            grossPay: null,
+            payFrequency: 'biweekly',
+            federalFilingStatus: 'single',
+            federalAllowances: 0,
+            additionalWithholding: 0,
+            localTax: 0,
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                // Validate inputs
+                if (!this.grossPay || this.grossPay <= 0) {
+                    this.error = 'Please enter a valid gross pay amount';
+                    return;
+                }
+                
+                if (this.localTax < 0 || this.localTax > 10) {
+                    this.error = 'Local tax rate must be between 0 and 10%';
+                    return;
+                }
+                
+                // Convert to annual if needed
+                let annualGross = parseFloat(this.grossPay);
+                
+                switch(this.payFrequency) {
+                    case 'weekly':
+                        annualGross *= 52;
+                        break;
+                    case 'biweekly':
+                        annualGross *= 26;
+                        break;
+                    case 'semimonthly':
+                        annualGross *= 24;
+                        break;
+                    case 'monthly':
+                        annualGross *= 12;
+                        break;
+                    // annual is already annual
+                }
+                
+                // Calculate federal tax (simplified)
+                let federalTax = 0;
+                if (annualGross > 0) {
+                    // Simplified tax calculation - in a real app you'd use IRS tables
+                    const standardDeduction = this.federalFilingStatus === 'single' ? 13850 : 
+                                           this.federalFilingStatus === 'married' ? 27700 : 20800;
+                    const taxableIncome = Math.max(0, annualGross - standardDeduction - (this.federalAllowances * 4300));
+                    
+                    // Progressive tax brackets (2023)
+                    if (taxableIncome > 0) {
+                        const brackets = this.federalFilingStatus === 'single' ? 
+                            [[0, 10275, 0.10], [10275, 41775, 0.12], [41775, 89075, 0.22], 
+                             [89075, 170050, 0.24], [170050, 215950, 0.32], 
+                             [215950, 539900, 0.35], [539900, Infinity, 0.37]] :
+                            [[0, 20550, 0.10], [20550, 83550, 0.12], [83550, 178150, 0.22], 
+                             [178150, 340100, 0.24], [340100, 431900, 0.32], 
+                             [431900, 647850, 0.35], [647850, Infinity, 0.37]];
+                        
+                        for (const [min, max, rate] of brackets) {
+                            if (taxableIncome > min) {
+                                federalTax += (Math.min(taxableIncome, max) - min) * rate;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                // Calculate Colorado state tax (flat 4.55%)
+                const stateTax = annualGross * 0.0455;
+                
+                // Calculate local tax
+                const localTax = annualGross * (this.localTax / 100);
+                
+                // Calculate FICA taxes
+                const socialSecurity = Math.min(annualGross, 160200) * 0.062;
+                const medicare = annualGross * (annualGross > (this.federalFilingStatus === 'single' ? 200000 : 250000) ? 0.0235 : 0.0145);
+                
+                // Add additional withholding
+                const additionalWithholdingAnnual = parseFloat(this.additionalWithholding) || 0;
+                switch(this.payFrequency) {
+                    case 'weekly':
+                        additionalWithholdingAnnual *= 52;
+                        break;
+                    case 'biweekly':
+                        additionalWithholdingAnnual *= 26;
+                        break;
+                    case 'semimonthly':
+                        additionalWithholdingAnnual *= 24;
+                        break;
+                    case 'monthly':
+                        additionalWithholdingAnnual *= 12;
+                        break;
+                    // annual is already annual
+                }
+                
+                // Calculate net pay
+                const totalDeductions = federalTax + stateTax + localTax + socialSecurity + medicare + additionalWithholdingAnnual;
+                const netPay = annualGross - totalDeductions;
+                
+                // Convert back to pay period
+                let divisor = 1;
+                switch(this.payFrequency) {
+                    case 'weekly':
+                        divisor = 52;
+                        break;
+                    case 'biweekly':
+                        divisor = 26;
+                        break;
+                    case 'semimonthly':
+                        divisor = 24;
+                        break;
+                    case 'monthly':
+                        divisor = 12;
+                        break;
+                    // annual is already annual
+                }
+                
+                this.result = {
+                    grossPay: (annualGross / divisor).toFixed(2),
+                    federalTax: (federalTax / divisor).toFixed(2),
+                    stateTax: (stateTax / divisor).toFixed(2),
+                    localTax: (localTax / divisor).toFixed(2),
+                    socialSecurity: (socialSecurity / divisor).toFixed(2),
+                    medicare: (medicare / divisor).toFixed(2),
+                    netPay: (netPay / divisor).toFixed(2)
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}DSCR Loan Calculator - Calculate Debt Service Coverage Ratio | [Your Site Name]{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Free online DSCR loan calculator. Calculate your Debt Service Coverage Ratio, NOI, and determine loan eligibility for investment properties. Essential tool for real estate investors.">
+<meta name="keywords" content="DSCR calculator, debt service coverage ratio, loan eligibility, NOI calculator, real estate financing, investment property loans">
+<meta property="og:title" content="DSCR Loan Calculator - Calculate Debt Service Coverage Ratio">
+<meta property="og:description" content="Free online tool to calculate DSCR for investment property loans. Determine your loan eligibility instantly.">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">DSCR Loan Calculator</h1>
+        
+        <div x-data="dscrCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="propertyIncome" class="block text-sm font-medium text-gray-700 mb-1">Annual Property Income ($)</label>
+                    <input x-model="propertyIncome" type="number" id="propertyIncome" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0">
+                </div>
+                <div>
+                    <label for="propertyExpenses" class="block text-sm font-medium text-gray-700 mb-1">Annual Property Expenses ($)</label>
+                    <input x-model="propertyExpenses" type="number" id="propertyExpenses" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="loanAmount" class="block text-sm font-medium text-gray-700 mb-1">Loan Amount ($)</label>
+                    <input x-model="loanAmount" type="number" id="loanAmount" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0">
+                </div>
+                <div>
+                    <label for="interestRate" class="block text-sm font-medium text-gray-700 mb-1">Interest Rate (%)</label>
+                    <input x-model="interestRate" type="number" step="0.01" id="interestRate" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="loanTerm" class="block text-sm font-medium text-gray-700 mb-1">Loan Term (years)</label>
+                    <select x-model="loanTerm" id="loanTerm" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="15">15 years</option>
+                        <option value="20">20 years</option>
+                        <option value="25">25 years</option>
+                        <option value="30">30 years</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="requiredDSCR" class="block text-sm font-medium text-gray-700 mb-1">Required DSCR</label>
+                    <input x-model="requiredDSCR" type="number" step="0.01" id="requiredDSCR" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="1.25" value="1.25">
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate DSCR
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">DSCR Calculation Results</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Net Operating Income (NOI): <span class="font-bold" x-text="'$' + result.noi.toLocaleString()"></span></p>
+                            <p>Annual Debt Service: <span class="font-bold" x-text="'$' + result.debtService.toLocaleString()"></span></p>
+                            <p>DSCR: <span class="font-bold" x-text="result.dscr.toFixed(2)"></span></p>
+                            <p>Loan Eligibility: <span class="font-bold" x-text="result.eligible ? 'Eligible' : 'Not Eligible'" :class="result.eligible ? 'text-green-600' : 'text-red-600'"></span></p>
+                            <p x-show="!result.eligible">Required DSCR Not Met (Minimum <span x-text="requiredDSCR"></span>)</p>
+                            <p x-show="result.maxLoanAmount">Maximum Loan Amount: <span class="font-bold" x-text="'$' + result.maxLoanAmount.toLocaleString()"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-800">Error</h3>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <h2 class="text-xl font-semibold text-dark mb-4">About DSCR Loans and How to Calculate Debt Service Coverage Ratio</h2>
+        <p class="text-gray-600 mb-4">The Debt Service Coverage Ratio (DSCR) is a critical financial metric used by lenders to assess the cash flow of income-producing properties and determine loan eligibility. Our DSCR calculator helps real estate investors quickly evaluate their property's financial performance.</p>
+        
+        <h3 class="font-medium text-gray-700 mb-2">Key Concepts in DSCR Calculation:</h3>
+        <ol class="list-decimal list-inside space-y-2 text-gray-600 mb-4">
+            <li><strong>Net Operating Income (NOI):</strong> Annual property income minus operating expenses (excluding financing costs)</li>
+            <li><strong>Debt Service:</strong> Total annual mortgage payments including principal and interest</li>
+            <li><strong>DSCR Formula:</strong> NOI ÷ Debt Service = Debt Service Coverage Ratio</li>
+        </ol>
+
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">Understanding DSCR Values:</h3>
+            <ul class="grid grid-cols-1 gap-2 text-sm text-gray-600">
+                <li>• DSCR > 1.0: Property generates sufficient income to cover debt payments</li>
+                <li>• DSCR < 1.0: Property income is insufficient to cover debt obligations</li>
+                <li>• Most commercial lenders require minimum DSCR of 1.20-1.25 for loan approval</li>
+                <li>• Higher DSCR values (1.5+) indicate stronger cash flow and lower risk</li>
+            </ul>
+        </div>
+
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">Practical DSCR Calculation Example:</h3>
+            <p class="text-sm text-gray-600">
+                Consider a rental property with:<br>
+                • $120,000 annual rental income<br>
+                • $20,000 annual operating expenses<br>
+                • $80,000 annual mortgage payments<br><br>
+                
+                NOI = $120,000 - $20,000 = $100,000<br>
+                DSCR = $100,000 ÷ $80,000 = 1.25<br><br>
+                
+                This property meets typical lender requirements with a 1.25 DSCR.
+            </p>
+        </div>
+        
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-700 mb-2">How to Improve Your DSCR:</h3>
+            <ul class="grid grid-cols-1 gap-2 text-sm text-gray-600">
+                <li>• Increase property income through rent adjustments or additional revenue streams</li>
+                <li>• Reduce operating expenses through cost-saving measures</li>
+                <li>• Consider a larger down payment to reduce loan amount</li>
+                <li>• Negotiate better loan terms (lower interest rate or longer term)</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    function dscrCalculator() {
+        return {
+            propertyIncome: null,
+            propertyExpenses: null,
+            loanAmount: null,
+            interestRate: null,
+            loanTerm: '30',
+            requiredDSCR: '1.25',
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                // Validate inputs
+                if (!this.propertyIncome || !this.propertyExpenses || !this.loanAmount || !this.interestRate) {
+                    this.error = 'Please fill in all required fields';
+                    return;
+                }
+                
+                if (this.propertyIncome <= 0 || this.propertyExpenses < 0 || this.loanAmount <= 0 || this.interestRate <= 0) {
+                    this.error = 'All values must be greater than zero';
+                    return;
+                }
+                
+                // Calculate NOI
+                const noi = parseFloat(this.propertyIncome) - parseFloat(this.propertyExpenses);
+                
+                // Calculate monthly payment
+                const principal = parseFloat(this.loanAmount);
+                const rate = parseFloat(this.interestRate) / 100 / 12;
+                const payments = parseFloat(this.loanTerm) * 12;
+                
+                const monthlyPayment = principal * rate * Math.pow(1 + rate, payments) / (Math.pow(1 + rate, payments) - 1);
+                const annualDebtService = monthlyPayment * 12;
+                
+                // Calculate DSCR
+                const dscr = noi / annualDebtService;
+                
+                // Calculate maximum loan amount if DSCR is not met
+                let maxLoanAmount = null;
+                if (dscr < parseFloat(this.requiredDSCR)) {
+                    const maxDebtService = noi / parseFloat(this.requiredDSCR);
+                    maxLoanAmount = this.calculateMaxLoanAmount(maxDebtService, rate, payments);
+                }
+                
+                this.result = {
+                    noi: noi,
+                    debtService: annualDebtService,
+                    dscr: dscr,
+                    eligible: dscr >= parseFloat(this.requiredDSCR),
+                    maxLoanAmount: maxLoanAmount
+                };
+            },
+            
+            calculateMaxLoanAmount(maxAnnualDebtService, monthlyRate, totalPayments) {
+                const maxMonthlyPayment = maxAnnualDebtService / 12;
+                const maxLoanAmount = maxMonthlyPayment * (Math.pow(1 + monthlyRate, totalPayments) - 1) / (monthlyRate * Math.pow(1 + monthlyRate, totalPayments));
+                return maxLoanAmount;
+            }
+        }
+    }
+</script>
+{% endblock %}

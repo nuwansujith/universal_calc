@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Bonus Tax Calculator 2024 - Calculate Your Bonus Take-Home Pay{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Free online bonus tax calculator for 2024. Calculate how much of your bonus you'll take home after federal, state, FICA taxes. Compare percentage vs aggregate methods.">
+<meta name="keywords" content="bonus tax calculator, bonus paycheck calculator, how are bonuses taxed, bonus tax rate 2024, calculate bonus take home pay">
+<meta property="og:title" content="Bonus Tax Calculator 2024 - Calculate Your Bonus Take-Home Pay">
+<meta property="og:description" content="Free online calculator to estimate how much of your bonus you'll keep after taxes in 2024. Federal, state, and FICA tax calculations.">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Bonus Tax Calculator 2024</h1>
+        
+        <div x-data="bonusCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="bonusAmount" class="block text-sm font-medium text-gray-700 mb-1">Bonus Amount ($)</label>
+                    <input x-model="bonusAmount" type="number" id="bonusAmount" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
+                </div>
+                <div>
+                    <label for="payFrequency" class="block text-sm font-medium text-gray-700 mb-1">Pay Frequency</label>
+                    <select x-model="payFrequency" id="payFrequency" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="biweekly">Bi-weekly</option>
+                        <option value="semimonthly">Semi-monthly</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="filingStatus" class="block text-sm font-medium text-gray-700 mb-1">Filing Status</label>
+                    <select x-model="filingStatus" id="filingStatus" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="single">Single</option>
+                        <option value="married">Married Filing Jointly</option>
+                        <option value="head">Head of Household</option>
+                        <option value="separate">Married Filing Separately</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                    <select x-model="state" id="state" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="none">No State Income Tax</option>
+                        <option value="AL">Alabama</option>
+                        <option value="AK">Alaska</option>
+                        <!-- Add all other states here -->
+                        <option value="NJ">New Jersey</option>
+                        <option value="NY">New York</option>
+                        <!-- Continue with remaining states -->
+                        <option value="WY">Wyoming</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="regularPay" class="block text-sm font-medium text-gray-700 mb-1">Regular Paycheck Amount ($)</label>
+                    <input x-model="regularPay" type="number" id="regularPay" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
+                </div>
+                <div>
+                    <label for="yearToDate" class="block text-sm font-medium text-gray-700 mb-1">Year-to-Date Earnings ($)</label>
+                    <input x-model="yearToDate" type="number" id="yearToDate" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate Bonus Taxes
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Bonus Tax Calculation Results</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Gross Bonus Amount: <span class="font-bold" x-text="'$' + result.grossBonus.toLocaleString('en-US', {maximumFractionDigits: 2})"></span></p>
+                            <p>Federal Income Tax: <span class="font-bold" x-text="'$' + result.federalTax.toLocaleString('en-US', {maximumFractionDigits: 2})"></span> (<span x-text="result.federalTaxRate.toFixed(2)"></span>%)</p>
+                            <p>Social Security Tax: <span class="font-bold" x-text="'$' + result.socialSecurityTax.toLocaleString('en-US', {maximumFractionDigits: 2})"></span> (6.2%)</p>
+                            <p>Medicare Tax: <span class="font-bold" x-text="'$' + result.medicareTax.toLocaleString('en-US', {maximumFractionDigits: 2})"></span> (1.45%)</p>
+                            <p x-show="result.stateTax > 0">State Income Tax: <span class="font-bold" x-text="'$' + result.stateTax.toLocaleString('en-US', {maximumFractionDigits: 2})"></span> (<span x-text="result.stateTaxRate.toFixed(2)"></span>%)</p>
+                            <p class="pt-2 border-t border-green-200">Net Bonus Pay: <span class="font-bold text-lg" x-text="'$' + result.netBonus.toLocaleString('en-US', {maximumFractionDigits: 2})"></span></p>
+                            <p>Effective Tax Rate: <span class="font-bold" x-text="result.effectiveTaxRate.toFixed(2)"></span>%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-800">Error</h3>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">How Are Bonuses Taxed in 2024? Understanding Your Bonus Paycheck</h2>
+            <p class="text-gray-600 mb-4">Bonuses are considered supplemental wages by the IRS and are typically taxed differently than regular income. Employers usually use one of two methods to calculate bonus taxes:</p>
+            
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Percentage Method (Most Common for Bonuses):</h3>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li>• Flat 22% federal tax rate for bonuses under $1 million</li>
+                    <li>• 37% federal tax rate for bonuses over $1 million</li>
+                    <li>• Plus mandatory Social Security (6.2%) and Medicare (1.45%) taxes</li>
+                    <li>• State taxes vary by location (some states don't tax bonuses)</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Aggregate Method (Combined with Regular Paycheck):</h3>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li>• Bonus is added to your regular paycheck amount</li>
+                    <li>• Taxes calculated on the combined total as if it were a normal paycheck</li>
+                    <li>• Often results in higher withholding than the percentage method</li>
+                </ul>
+            </section>
+
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Key Facts About Bonus Taxes in 2024:</h3>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li>• Bonus taxes are <strong>withheld</strong> at a higher rate but <strong>taxed</strong> at your normal income tax rate when you file</li>
+                    <li>• You may get a tax refund if too much was withheld from your bonus</li>
+                    <li>• Some states (like California and Pennsylvania) tax bonuses as regular income</li>
+                    <li>• Supplemental wages over $1 million are taxed at the highest federal rate (37%)</li>
+                    <li>• The Social Security tax wage base limit is $160,200 for 2024</li>
+                </ul>
+            </section>
+
+            <section class="mt-4">
+                <h3 class="font-medium text-gray-700 mb-2">Frequently Asked Questions</h3>
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-medium text-gray-700">Why is my bonus taxed so high?</h4>
+                        <p class="text-sm text-gray-600 mt-1">Bonuses have higher withholding rates, but you'll get any over-withholding back when you file your tax return. The actual tax rate is your normal income tax rate.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-700">Can I request a different withholding method?</h4>
+                        <p class="text-sm text-gray-600 mt-1">Some employers may allow you to request additional withholding adjustments using Form W-4, but the basic withholding methods are determined by IRS rules.</p>
+                    </div>
+                </div>
+            </section>
+        </article>
+    </div>
+</div>
+
+<script>
+    function bonusCalculator() {
+        return {
+            bonusAmount: null,
+            payFrequency: 'biweekly',
+            filingStatus: 'single',
+            state: 'none',
+            regularPay: null,
+            yearToDate: null,
+            result: null,
+            error: null,
+            
+            stateTaxRates: {
+                // Sample state tax rates - you should complete with accurate rates
+                'AL': 5.0, 'AK': 0, 'AZ': 4.5, 'AR': 5.9, 'CA': 9.3,
+                'CO': 4.55, 'CT': 6.99, 'DE': 6.6, 'FL': 0, 'GA': 5.75,
+                'HI': 8.25, 'ID': 6.925, 'IL': 4.95, 'IN': 3.23, 'IA': 6.0,
+                'KS': 5.7, 'KY': 5.0, 'LA': 4.25, 'ME': 7.15, 'MD': 5.75,
+                'MA': 5.0, 'MI': 4.25, 'MN': 9.85, 'MS': 5.0, 'MO': 5.4,
+                'MT': 6.75, 'NE': 6.84, 'NV': 0, 'NH': 0, 'NJ': 6.37,
+                'NM': 4.9, 'NY': 6.85, 'NC': 5.25, 'ND': 2.9, 'OH': 3.99,
+                'OK': 5.0, 'OR': 9.9, 'PA': 3.07, 'RI': 5.99, 'SC': 7.0,
+                'SD': 0, 'TN': 0, 'TX': 0, 'UT': 4.95, 'VT': 8.75,
+                'VA': 5.75, 'WA': 0, 'WV': 6.5, 'WI': 7.65, 'WY': 0
+            },
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                // Validate inputs
+                if (!this.bonusAmount || this.bonusAmount <= 0) {
+                    this.error = 'Please enter a valid bonus amount';
+                    return;
+                }
+                
+                const bonus = parseFloat(this.bonusAmount);
+                
+                // Calculate federal tax (percentage method)
+                let federalTaxRate = 0.22;
+                if (bonus > 1000000) {
+                    federalTaxRate = 0.37;
+                }
+                
+                const federalTax = bonus * federalTaxRate;
+                
+                // Calculate FICA taxes
+                const socialSecurityTax = Math.min(bonus * 0.062, 160200 - (this.yearToDate || 0));
+                const medicareTax = bonus * 0.0145;
+                
+                // Calculate state tax
+                let stateTax = 0;
+                let stateTaxRate = 0;
+                if (this.state !== 'none') {
+                    stateTaxRate = this.stateTaxRates[this.state] / 100;
+                    stateTax = bonus * stateTaxRate;
+                }
+                
+                // Calculate net pay
+                const totalTaxes = federalTax + socialSecurityTax + medicareTax + stateTax;
+                const netBonus = bonus - totalTaxes;
+                const effectiveTaxRate = (totalTaxes / bonus) * 100;
+                
+                this.result = {
+                    grossBonus: bonus,
+                    federalTax: federalTax,
+                    federalTaxRate: federalTaxRate * 100,
+                    socialSecurityTax: socialSecurityTax,
+                    medicareTax: medicareTax,
+                    stateTax: stateTax,
+                    stateTaxRate: stateTaxRate * 100,
+                    netBonus: netBonus,
+                    effectiveTaxRate: effectiveTaxRate
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

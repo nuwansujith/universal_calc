@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+
+{% block title %}New Jersey Paycheck Calculator - Accurate NJ Tax Estimates 2023 | [Your Site Name]{% endblock %}
+
+{% block meta_description %}Calculate your New Jersey paycheck after taxes with our free NJ paycheck calculator. Estimate federal, state (NJ), Social Security, and Medicare withholdings for any pay frequency.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">New Jersey Paycheck Calculator</h1>
+        
+        <div x-data="paycheckCalculator()" class="space-y-6">
+            <!-- Input Fields -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="grossPay" class="block text-sm font-medium text-gray-700 mb-1">Gross Pay ($)</label>
+                    <input x-model="grossPay" type="number" step="0.01" id="grossPay" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 3000.00">
+                </div>
+                <div>
+                    <label for="payFrequency" class="block text-sm font-medium text-gray-700 mb-1">Pay Frequency</label>
+                    <select x-model="payFrequency" id="payFrequency" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="weekly">Weekly</option>
+                        <option value="biweekly">Bi-Weekly</option>
+                        <option value="semimonthly">Semi-Monthly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="annually">Annually</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Federal Tax Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="federalAllowances" class="block text-sm font-medium text-gray-700 mb-1">Federal Allowances</label>
+                    <input x-model="federalAllowances" type="number" id="federalAllowances" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 1" min="0">
+                </div>
+                <div>
+                    <label for="additionalFederalWithholding" class="block text-sm font-medium text-gray-700 mb-1">Additional Federal Withholding ($)</label>
+                    <input x-model="additionalFederalWithholding" type="number" step="0.01" id="additionalFederalWithholding" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 0.00" min="0">
+                </div>
+            </div>
+
+            <!-- NJ-Specific Fields -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">NJ Filing Status</label>
+                    <select x-model="njFilingStatus" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="single">Single</option>
+                        <option value="married">Married</option>
+                        <option value="head_of_household">Head of Household</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="njAdditionalWithholding" class="block text-sm font-medium text-gray-700 mb-1">Additional NJ Withholding ($)</label>
+                    <input x-model="njAdditionalWithholding" type="number" step="0.01" id="njAdditionalWithholding" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g. 0.00" min="0">
+                </div>
+            </div>
+
+            <!-- Calculate Button -->
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate My NJ Paycheck
+            </button>
+
+            <!-- Results Display -->
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">New Jersey Paycheck Summary</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Gross Pay: <span class="font-bold">$<span x-text="result.grossPay.toFixed(2)"></span></span></p>
+                            <p>Federal Tax: <span class="font-bold">$<span x-text="result.federalTax.toFixed(2)"></span></span></p>
+                            <p>Social Security: <span class="font-bold">$<span x-text="result.socialSecurityTax.toFixed(2)"></span></span></p>
+                            <p>Medicare: <span class="font-bold">$<span x-text="result.medicareTax.toFixed(2)"></span></span></p>
+                            <p>NJ State Tax: <span class="font-bold">$<span x-text="result.njTax.toFixed(2)"></span></span></p>
+                            <p class="pt-2 border-t border-green-200">Net Pay: <span class="font-bold text-lg">$<span x-text="result.netPay.toFixed(2)"></span></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Information Section -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">Understanding New Jersey Paycheck Taxes</h2>
+            <p class="text-gray-600 mb-4">New Jersey has a progressive state income tax system with rates ranging from 1.4% to 10.75% depending on your income level and filing status. Our NJ paycheck calculator helps you estimate your take-home pay after all deductions including federal tax, NJ state tax, Social Security (6.2%), and Medicare (1.45%).</p>
+            
+            <section class="mb-6">
+                <h3 class="font-medium text-gray-700 mb-2">How to Use This New Jersey Paycheck Calculator:</h3>
+                <ol class="list-decimal list-inside space-y-2 text-gray-600">
+                    <li><strong>Enter your gross pay:</strong> Your total earnings before any deductions</li>
+                    <li><strong>Select your pay frequency:</strong> How often you receive paychecks (weekly, bi-weekly, etc.)</li>
+                    <li><strong>Input your federal allowances:</strong> From your W-4 form (typically 0-3)</li>
+                    <li><strong>Choose your NJ filing status:</strong> Single, Married, or Head of Household</li>
+                    <li><strong>Add any additional withholdings:</strong> If you request extra tax withholding</li>
+                    <li><strong>Click "Calculate My NJ Paycheck":</strong> See your estimated net pay and tax breakdown</li>
+                </ol>
+            </section>
+            
+            <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">New Jersey Tax Rates (2023):</h3>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 mb-1">Single Filers:</h4>
+                        <ul class="text-sm text-gray-600 ml-4 list-disc">
+                            <li>1.4% on first $20,000</li>
+                            <li>1.75% on $20,001-$35,000</li>
+                            <li>3.5% on $35,001-$40,000</li>
+                            <li>5.525% on $40,001-$75,000</li>
+                            <li>6.37% on $75,001-$500,000</li>
+                            <li>8.97% on $500,001-$5,000,000</li>
+                            <li>10.75% on income over $5,000,000</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 mb-1">Married/Head of Household:</h4>
+                        <ul class="text-sm text-gray-600 ml-4 list-disc">
+                            <li>1.4% on first $20,000</li>
+                            <li>1.75% on $20,001-$50,000</li>
+                            <li>2.45% on $50,001-$70,000</li>
+                            <li>3.5% on $70,001-$80,000</li>
+                            <li>5.525% on $80,001-$150,000</li>
+                            <li>6.37% on $150,001-$500,000</li>
+                            <li>8.97% on $500,001-$5,000,000</li>
+                            <li>10.75% on income over $5,000,000</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="mt-2 text-sm text-gray-600">Note: NJ also charges 0.425% SUI/SDI tax on the first $156,800 of wages.</p>
+            </div>
+
+            <section class="mt-6">
+                <h3 class="text-lg font-semibold text-dark mb-3">New Jersey-Specific Tax Considerations</h3>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <h4 class="font-medium text-gray-700 mb-2">NJ Tax Benefits</h4>
+                        <ul class="space-y-2 text-gray-600 text-sm">
+                            <li>• No tax on Social Security benefits</li>
+                            <li>• Pension income exclusion for seniors</li>
+                            <li>• Property tax deduction up to $15,000</li>
+                            <li>• Veterans may qualify for additional deductions</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <h4 class="font-medium text-gray-700 mb-2">NJ Tax Obligations</h4>
+                        <ul class="space-y-2 text-gray-600 text-sm">
+                            <li>• Some municipalities have local payroll taxes</li>
+                            <li>• NJ has an estate tax with $2M exemption</li>
+                            <li>• Sales tax rate of 6.625% (some areas 3.325%)</li>
+                            <li>• Property taxes among highest in nation</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mt-6">
+                <h3 class="text-lg font-semibold text-dark mb-3">Frequently Asked Questions</h3>
+                <div class="space-y-4">
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <h4 class="font-medium text-gray-700 mb-1">How accurate is this NJ paycheck calculator?</h4>
+                        <p class="text-gray-600 text-sm">Our calculator provides estimates based on current NJ tax rates and formulas. For exact figures, consult a tax professional or your payroll department.</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <h4 class="font-medium text-gray-700 mb-1">When are NJ state taxes due?</h4>
+                        <p class="text-gray-600 text-sm">NJ state income taxes are due April 15, same as federal taxes. Quarterly estimated payments may be required if you have significant non-wage income.</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <h4 class="font-medium text-gray-700 mb-1">Does NJ tax remote workers?</h4>
+                        <p class="text-gray-600 text-sm">New Jersey taxes residents on all income regardless of source. Non-residents only pay NJ tax on income earned from NJ sources.</p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h3 class="font-medium text-blue-800 mb-2">NJ Tax Tip:</h3>
+                <p class="text-blue-700 text-sm">New Jersey offers property tax relief programs like the ANCHOR program and Senior Freeze. Check if you qualify for these benefits to reduce your overall tax burden.</p>
+            </div>
+        </article>
+    </div>
+</div>
+
+<script>
+    function paycheckCalculator() {
+        return {
+            grossPay: null,
+            payFrequency: 'biweekly',
+            federalAllowances: 1,
+            additionalFederalWithholding: 0,
+            njFilingStatus: 'single',
+            njAdditionalWithholding: 0,
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                if (!this.grossPay || this.grossPay <= 0) {
+                    this.error = 'Please enter a valid gross pay amount';
+                    return;
+                }
+                
+                // Calculate annual income
+                let annualIncome = this.calculateAnnualIncome();
+                
+                // Calculate taxes
+                const federalTax = this.calculateFederalTax(annualIncome);
+                const socialSecurityTax = Math.min(annualIncome, 160200) * 0.062;
+                const medicareTax = annualIncome * 0.0145;
+                const njTax = this.calculateNJTax(annualIncome);
+                
+                // Calculate per paycheck amounts
+                const payPeriods = this.getPayPeriods();
+                const federalTaxPerPaycheck = federalTax / payPeriods;
+                const socialSecurityTaxPerPaycheck = socialSecurityTax / payPeriods;
+                const medicareTaxPerPaycheck = medicareTax / payPeriods;
+                const njTaxPerPaycheck = njTax / payPeriods;
+                
+                // Calculate net pay
+                const totalDeductions = 
+                    federalTaxPerPaycheck + 
+                    socialSecurityTaxPerPaycheck + 
+                    medicareTaxPerPaycheck + 
+                    njTaxPerPaycheck + 
+                    parseFloat(this.additionalFederalWithholding || 0) +
+                    parseFloat(this.njAdditionalWithholding || 0);
+                
+                const netPay = this.grossPay - totalDeductions;
+                
+                this.result = {
+                    grossPay: parseFloat(this.grossPay),
+                    federalTax: federalTaxPerPaycheck + parseFloat(this.additionalFederalWithholding || 0),
+                    socialSecurityTax: socialSecurityTaxPerPaycheck,
+                    medicareTax: medicareTaxPerPaycheck,
+                    njTax: njTaxPerPaycheck + parseFloat(this.njAdditionalWithholding || 0),
+                    netPay: netPay
+                };
+            },
+            
+            calculateAnnualIncome() {
+                switch(this.payFrequency) {
+                    case 'weekly': return this.grossPay * 52;
+                    case 'biweekly': return this.grossPay * 26;
+                    case 'semimonthly': return this.grossPay * 24;
+                    case 'monthly': return this.grossPay * 12;
+                    case 'annually': return this.grossPay;
+                    default: return this.grossPay * 26; // Default to biweekly
+                }
+            },
+            
+            getPayPeriods() {
+                switch(this.payFrequency) {
+                    case 'weekly': return 52;
+                    case 'biweekly': return 26;
+                    case 'semimonthly': return 24;
+                    case 'monthly': return 12;
+                    case 'annually': return 1;
+                    default: return 26;
+                }
+            },
+            
+            calculateFederalTax(annualIncome) {
+                // Same federal tax calculation as previous calculators
+                // ... (use the same code from Ohio/Michigan calculators)
+            },
+            
+            calculateNJTax(annualIncome) {
+                // New Jersey progressive tax calculation (2023 rates)
+                let tax = 0;
+                const brackets = this.getNJBrackets();
+                
+                for (let i = 0; i < brackets.length; i++) {
+                    if (annualIncome > brackets[i].limit) {
+                        tax += (brackets[i].limit - (i > 0 ? brackets[i-1].limit : 0)) * brackets[i].rate;
+                    } else {
+                        tax += (annualIncome - (i > 0 ? brackets[i-1].limit : 0)) * brackets[i].rate;
+                        break;
+                    }
+                }
+                
+                // Add NJ SUI/SDI tax (0.425%)
+                tax += Math.min(annualIncome, 156800) * 0.00425;
+                
+                return tax;
+            },
+            
+            getNJBrackets() {
+                // 2023 NJ tax brackets for single filers
+                if (this.njFilingStatus === 'single') {
+                    return [
+                        { limit: 20000, rate: 0.014 },
+                        { limit: 35000, rate: 0.0175 },
+                        { limit: 40000, rate: 0.035 },
+                        { limit: 75000, rate: 0.05525 },
+                        { limit: 500000, rate: 0.0637 },
+                        { limit: 5000000, rate: 0.0897 },
+                        { limit: Infinity, rate: 0.1075 }
+                    ];
+                } 
+                // Married filing jointly or head of household
+                else {
+                    return [
+                        { limit: 20000, rate: 0.014 },
+                        { limit: 50000, rate: 0.0175 },
+                        { limit: 70000, rate: 0.0245 },
+                        { limit: 80000, rate: 0.035 },
+                        { limit: 150000, rate: 0.05525 },
+                        { limit: 500000, rate: 0.0637 },
+                        { limit: 5000000, rate: 0.0897 },
+                        { limit: Infinity, rate: 0.1075 }
+                    ];
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}

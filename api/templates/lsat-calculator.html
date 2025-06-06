@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}LSAT Score Calculator | Estimate Your Law School Admission Test Results{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Free LSAT score calculator. Estimate your scaled score (120-180), percentile rank, and see how your raw score converts to the official LSAT scoring system.">
+<meta name="keywords" content="LSAT calculator, LSAT score converter, law school admission test, LSAT scoring, LSAT percentile, LSAT raw score">
+<meta property="og:title" content="LSAT Score Calculator | Estimate Your Law School Admission Test Results">
+<meta property="og:description" content="Calculate your estimated LSAT score based on practice test performance. See your projected scaled score and percentile ranking.">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto p-4">
+    <article class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">LSAT Score Calculator</h1>
+        
+        <section x-data="lsatCalculator()" class="space-y-6">
+            <!-- Logical Reasoning Section -->
+            <div class="bg-blue-50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-blue-800 mb-3">Logical Reasoning (2 Sections)</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Section 1 Correct (24-26 questions)</label>
+                        <input x-model="lr1" type="number" min="0" max="26" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Section 2 Correct (24-26 questions)</label>
+                        <input x-model="lr2" type="number" min="0" max="26" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytical Reasoning Section -->
+            <div class="bg-green-50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-green-800 mb-3">Analytical Reasoning (Logic Games)</h2>
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answers (22-24 questions)</label>
+                        <input x-model="ar" type="number" min="0" max="24" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reading Comprehension Section -->
+            <div class="bg-purple-50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-purple-800 mb-3">Reading Comprehension</h2>
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answers (26-28 questions)</label>
+                        <input x-model="rc" type="number" min="0" max="28" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Experimental Section (Optional) -->
+            <div class="bg-yellow-50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-yellow-800 mb-3">Experimental Section (Optional)</h2>
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answers (varies)</label>
+                        <input x-model="experimental" type="number" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">Note: You typically won't know which section was experimental</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calculate Button -->
+            <button @click="calculateScore()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate LSAT Score
+            </button>
+
+            <!-- Results -->
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">LSAT Score Result</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Raw Score: <span class="font-bold" x-text="result.rawScore"></span>/~101</p>
+                            <p>Scaled Score: <span class="font-bold" x-text="result.scaledScore"></span>/180</p>
+                            <p>Percentile: <span class="font-bold" x-text="result.percentile"></span></p>
+                            <p class="text-sm italic" x-text="result.scoreDescription"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </article>
+
+    <!-- Help Section -->
+    <article class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">How the LSAT Score is Calculated</h2>
+        <p class="text-gray-600 mb-4">This calculator estimates your LSAT score based on typical conversion curves:</p>
+        <ul class="list-disc list-inside space-y-2 text-gray-600">
+            <li><strong>Test Structure:</strong> 4 scored sections (2 Logical Reasoning, 1 Analytical Reasoning, 1 Reading Comprehension) plus 1 experimental section</li>
+            <li><strong>Raw Score:</strong> Number of questions answered correctly (no penalty for wrong answers)</li>
+            <li><strong>Scaled Score:</strong> Converted to the 120-180 scale using the test's curve</li>
+            <li>The experimental section is not scored and doesn't affect your results</li>
+            <li>Percentiles are based on recent LSAT administrations</li>
+        </ul>
+        <div class="mt-4 p-4 bg-gray-50 rounded-md">
+            <h3 class="font-medium text-gray-800 mb-2">Typical Score Conversion:</h3>
+            <div class="grid grid-cols-3 gap-2 text-sm">
+                <div class="font-medium">Raw Score</div>
+                <div class="font-medium">Scaled Score</div>
+                <div class="font-medium">Percentile</div>
+                <div>98-101</div><div>180</div><div>99.9%</div>
+                <div>90-92</div><div>170</div><div>97%</div>
+                <div>80-82</div><div>160</div><div>80%</div>
+                <div>65-67</div><div>150</div><div>45%</div>
+                <div>50-52</div><div>140</div><div>15%</div>
+            </div>
+        </div>
+        <p class="mt-4 text-sm text-gray-500">Note: This is an estimation tool. Actual LSAT conversions may vary slightly by test administration.</p>
+    </article>
+</div>
+
+<script>
+    function lsatCalculator() {
+        return {
+            lr1: 0,
+            lr2: 0,
+            ar: 0,
+            rc: 0,
+            experimental: 0,
+            result: null,
+            
+            calculateScore() {
+                // Calculate raw score (excluding experimental)
+                const rawScore = (parseInt(this.lr1) || 0) + 
+                                (parseInt(this.lr2) || 0) + 
+                                (parseInt(this.ar) || 0) + 
+                                (parseInt(this.rc) || 0);
+                
+                // Estimate scaled score (120-180)
+                let scaledScore;
+                if (rawScore >= 98) scaledScore = 180;
+                else if (rawScore >= 92) scaledScore = 175 + Math.floor((rawScore - 92) * 0.83);
+                else if (rawScore >= 82) scaledScore = 160 + Math.floor((rawScore - 82) * 1.5);
+                else if (rawScore >= 67) scaledScore = 150 + Math.floor((rawScore - 67) * 1.0);
+                else if (rawScore >= 52) scaledScore = 140 + Math.floor((rawScore - 52) * 0.66);
+                else scaledScore = 120 + Math.floor(rawScore * 0.38);
+                
+                // Ensure scaled score is within bounds
+                scaledScore = Math.min(180, Math.max(120, scaledScore));
+                
+                // Calculate percentile
+                let percentile;
+                if (scaledScore >= 175) percentile = "99%";
+                else if (scaledScore >= 170) percentile = "97-98%";
+                else if (scaledScore >= 165) percentile = "92-95%";
+                else if (scaledScore >= 160) percentile = "80-85%";
+                else if (scaledScore >= 155) percentile = "65-70%";
+                else if (scaledScore >= 150) percentile = "40-50%";
+                else if (scaledScore >= 145) percentile = "25-30%";
+                else percentile = "Below 25%";
+                
+                // Score description
+                let scoreDescription;
+                if (scaledScore >= 172) scoreDescription = "Exceptional score - competitive at all law schools";
+                else if (scaledScore >= 165) scoreDescription = "Strong score - competitive at top law schools";
+                else if (scaledScore >= 155) scoreDescription = "Good score - competitive at many law schools";
+                else if (scaledScore >= 150) scoreDescription = "Average score - meets minimum requirements for many schools";
+                else scoreDescription = "Below average - consider retaking or additional preparation";
+                
+                this.result = {
+                    rawScore: rawScore,
+                    scaledScore: scaledScore,
+                    percentile: percentile,
+                    scoreDescription: scoreDescription
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block title %}Quadratic Regression Calculator - Find Best Fit Parabola Online{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Free online quadratic regression calculator that finds the parabola equation (y = ax² + bx + c) best fitting your data points. Get accurate results with R² value and visualization.">
+<meta name="keywords" content="quadratic regression calculator, parabola fitting, quadratic equation calculator, statistical analysis, data fitting tool, R-squared calculator">
+<meta property="og:title" content="Quadratic Regression Calculator - Find Best Fit Parabola Online">
+<meta property="og:description" content="Free online tool to calculate quadratic regression and find the best fit parabola for your data points.">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Quadratic Regression Calculator</h1>
+        
+        <div x-data="quadraticRegression()" class="space-y-6">
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Enter your data points (x,y):</label>
+                    <div class="flex flex-wrap gap-2 mb-2" x-show="points.length > 0">
+                        <template x-for="(point, index) in points" :key="index">
+                            <div class="flex items-center bg-gray-100 rounded px-3 py-1">
+                                <span x-text="'(' + point.x + ',' + point.y + ')'"></span>
+                                <button @click="removePoint(index)" class="ml-2 text-red-500 hover:text-red-700" aria-label="Remove data point">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="flex gap-2">
+                        <input x-model="newPoint.x" type="number" step="any" class="w-1/2 px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="x value" aria-label="X coordinate">
+                        <input x-model="newPoint.y" type="number" step="any" class="w-1/2 px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="y value" aria-label="Y coordinate">
+                        <button @click="addPoint()" class="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-md">
+                            Add Point
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button @click="calculate()" :disabled="points.length < 3" :class="{'opacity-50 cursor-not-allowed': points.length < 3, 'bg-primary hover:bg-blue-700': points.length >= 3}" class="w-full text-white font-bold py-3 px-4 rounded-md transition duration-200" aria-label="Calculate quadratic regression">
+                    Calculate Regression
+                </button>
+                <button @click="clearData()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-md transition duration-200" aria-label="Clear all data">
+                    Clear Data
+                </button>
+            </div>
+
+            <div x-show="result" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Regression Results</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Equation: y = <span class="font-bold" x-text="result.a.toFixed(4)"></span>x² + <span class="font-bold" x-text="result.b.toFixed(4)"></span>x + <span class="font-bold" x-text="result.c.toFixed(4)"></span></p>
+                            <p>R² (Coefficient of Determination): <span class="font-bold" x-text="result.r2.toFixed(4)"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-red-800">Error</h2>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="result" class="bg-white rounded-lg p-4 border border-gray-200">
+                <div class="h-64" x-ref="chart" aria-label="Quadratic regression visualization chart"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">About Quadratic Regression</h2>
+            <p class="text-gray-600 mb-4">Quadratic regression is a statistical method for finding the equation of a parabola that best fits a set of data points. This powerful analysis technique models relationships where the rate of change is itself changing, creating a curved (parabolic) relationship between variables.</p>
+            <p class="text-center font-mono bg-gray-100 p-2 rounded mb-4">y = ax² + bx + c</p>
+            <p class="text-gray-600 mb-4">The quadratic regression equation includes these components:</p>
+            <ul class="list-disc list-inside space-y-1 text-gray-600 mb-4">
+                <li><strong>a</strong> - Determines the parabola's curvature (concave up if positive, concave down if negative)</li>
+                <li><strong>b</strong> - Controls the linear component of the relationship</li>
+                <li><strong>c</strong> - Represents the y-intercept of the parabola</li>
+                <li><strong>R²</strong> (R-squared) - Measures goodness of fit (0 to 1, where 1 indicates perfect fit)</li>
+            </ul>
+            <p class="text-gray-600 mb-4">Our quadratic regression calculator requires at least 3 data points to compute an accurate parabola equation. For best results, provide a range of x-values that adequately represent the relationship you're modeling.</p>
+            
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Common Applications of Quadratic Regression:</h3>
+                <ul class="grid grid-cols-1 md:grid-cols-2 gap-1 text-sm text-gray-600">
+                    <li>• Physics: Projectile motion and acceleration analysis</li>
+                    <li>• Economics: Cost/profit optimization models</li>
+                    <li>• Biology: Population growth and enzyme kinetics</li>
+                    <li>• Engineering: Structural load distribution</li>
+                    <li>• Meteorology: Temperature change patterns</li>
+                    <li>• Finance: Risk assessment models</li>
+                </ul>
+            </section>
+
+            <section class="mt-6">
+                <h3 class="font-medium text-gray-700 mb-2">How to Use This Quadratic Regression Tool:</h3>
+                <ol class="list-decimal list-inside space-y-2 text-gray-600">
+                    <li>Enter your x and y data points in the input fields</li>
+                    <li>Click "Add Point" for each data pair</li>
+                    <li>When you have at least 3 points, click "Calculate Regression"</li>
+                    <li>View your quadratic equation and R-squared value</li>
+                    <li>Analyze the visual graph of your data and regression curve</li>
+                </ol>
+            </section>
+        </article>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    function quadraticRegression() {
+        return {
+            points: [],
+            newPoint: { x: '', y: '' },
+            result: null,
+            error: null,
+            chart: null,
+            
+            addPoint() {
+                if (this.newPoint.x === '' || this.newPoint.y === '') {
+                    this.error = 'Please enter both x and y values';
+                    return;
+                }
+                
+                this.points.push({
+                    x: parseFloat(this.newPoint.x),
+                    y: parseFloat(this.newPoint.y)
+                });
+                
+                this.newPoint = { x: '', y: '' };
+                this.error = null;
+                this.result = null;
+                if (this.chart) {
+                    this.chart.destroy();
+                    this.chart = null;
+                }
+            },
+            
+            removePoint(index) {
+                this.points.splice(index, 1);
+                this.error = null;
+                this.result = null;
+                if (this.chart) {
+                    this.chart.destroy();
+                    this.chart = null;
+                }
+            },
+            
+            clearData() {
+                this.points = [];
+                this.newPoint = { x: '', y: '' };
+                this.result = null;
+                this.error = null;
+                if (this.chart) {
+                    this.chart.destroy();
+                    this.chart = null;
+                }
+            },
+            
+            calculate() {
+                if (this.points.length < 3) {
+                    this.error = 'At least 3 data points are required for quadratic regression';
+                    return;
+                }
+                
+                try {
+                    // Calculate quadratic regression coefficients
+                    const n = this.points.length;
+                    let xSum = 0, ySum = 0, x2Sum = 0, x3Sum = 0, x4Sum = 0, xySum = 0, x2ySum = 0;
+                    
+                    for (const point of this.points) {
+                        const x = point.x;
+                        const y = point.y;
+                        const x2 = x * x;
+                        const x3 = x2 * x;
+                        const x4 = x3 * x;
+                        
+                        xSum += x;
+                        ySum += y;
+                        x2Sum += x2;
+                        x3Sum += x3;
+                        x4Sum += x4;
+                        xySum += x * y;
+                        x2ySum += x2 * y;
+                    }
+                    
+                    // Solve the system of equations for a, b, c
+                    // Using matrix method for 3 equations
+                    const Sxx = x2Sum - (xSum * xSum) / n;
+                    const Sxy = xySum - (xSum * ySum) / n;
+                    const Sxx2 = x3Sum - (xSum * x2Sum) / n;
+                    const Sx2y = x2ySum - (x2Sum * ySum) / n;
+                    const Sx2x2 = x4Sum - (x2Sum * x2Sum) / n;
+                    
+                    const denominator = Sxx * Sx2x2 - Sxx2 * Sxx2;
+                    const a = (Sx2y * Sxx - Sxy * Sxx2) / denominator;
+                    const b = (Sxy * Sx2x2 - Sx2y * Sxx2) / denominator;
+                    const c = (ySum - b * xSum - a * x2Sum) / n;
+                    
+                    // Calculate R-squared
+                    let ssTotal = 0;
+                    let ssResidual = 0;
+                    const yMean = ySum / n;
+                    
+                    for (const point of this.points) {
+                        const yPred = a * point.x * point.x + b * point.x + c;
+                        ssTotal += Math.pow(point.y - yMean, 2);
+                        ssResidual += Math.pow(point.y - yPred, 2);
+                    }
+                    
+                    const r2 = 1 - (ssResidual / ssTotal);
+                    
+                    this.result = {
+                        a: a,
+                        b: b,
+                        c: c,
+                        r2: r2
+                    };
+                    
+                    this.error = null;
+                    this.createChart();
+                } catch (e) {
+                    this.error = 'Error calculating regression. Please check your data points.';
+                    console.error(e);
+                }
+            },
+            
+            createChart() {
+                if (!this.result || this.points.length === 0) return;
+                
+                // Prepare data for chart
+                const labels = this.points.map(p => p.x).sort((a, b) => a - b);
+                const minX = Math.min(...labels);
+                const maxX = Math.max(...labels);
+                const range = maxX - minX;
+                
+                // Generate points for the curve
+                const curvePoints = 100;
+                const step = range / curvePoints;
+                const curveLabels = [];
+                const curveData = [];
+                
+                for (let i = 0; i <= curvePoints; i++) {
+                    const x = minX + (i * step);
+                    curveLabels.push(x);
+                    curveData.push(this.result.a * x * x + this.result.b * x + this.result.c);
+                }
+                
+                const ctx = this.$refs.chart.getContext('2d');
+                
+                if (this.chart) {
+                    this.chart.destroy();
+                }
+                
+                this.chart = new Chart(ctx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Data Points',
+                                data: this.points.map(p => ({x: p.x, y: p.y})),
+                                backgroundColor: 'rgba(79, 70, 229, 0.8)',
+                                pointRadius: 6,
+                                pointHoverRadius: 8
+                            },
+                            {
+                                label: 'Regression Curve',
+                                data: curveLabels.map((x, i) => ({x: x, y: curveData[i]})),
+                                type: 'line',
+                                borderColor: 'rgba(239, 68, 68, 0.8)',
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                fill: false,
+                                showLine: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                type: 'linear',
+                                position: 'center',
+                                title: {
+                                    display: true,
+                                    text: 'X values'
+                                }
+                            },
+                            y: {
+                                type: 'linear',
+                                position: 'center',
+                                title: {
+                                    display: true,
+                                    text: 'Y values'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    }
+</script>
+{% endblock %}

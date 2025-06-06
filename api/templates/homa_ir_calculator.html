@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}HOMA-IR Calculator - Measure Insulin Resistance Accurately | YourSiteName{% endblock %}
+
+{% block meta_description %}Calculate your HOMA-IR score (Homeostatic Model Assessment of Insulin Resistance) with our free online tool. Understand your insulin resistance risk with instant results and interpretation.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">HOMA-IR Calculator: Measure Your Insulin Resistance</h1>
+        
+        <div x-data="homaIrCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="fastingGlucose" class="block text-sm font-medium text-gray-700 mb-1">Fasting Glucose (mg/dL)</label>
+                    <input x-model="fastingGlucose" type="number" id="fastingGlucose" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g., 90" aria-label="Enter your fasting glucose level in mg/dL">
+                </div>
+                <div>
+                    <label for="fastingInsulin" class="block text-sm font-medium text-gray-700 mb-1">Fasting Insulin (μU/mL)</label>
+                    <input x-model="fastingInsulin" type="number" id="fastingInsulin" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="e.g., 10" aria-label="Enter your fasting insulin level in μU/mL">
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200" aria-label="Calculate HOMA-IR score">
+                Calculate HOMA-IR
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4" role="alert">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-green-800">Your HOMA-IR Results</h2>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>HOMA-IR Score: <span class="font-bold" x-text="result.score"></span></p>
+                            <p>Interpretation: <span class="font-bold" x-text="result.interpretation"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4" role="alert">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-medium text-red-800">Calculation Error</h2>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">Understanding HOMA-IR: The Gold Standard for Insulin Resistance Measurement</h2>
+            <p class="text-gray-600 mb-4">The Homeostatic Model Assessment of Insulin Resistance (HOMA-IR) is the most widely used method to quantify insulin resistance, a key factor in metabolic health. Our calculator provides accurate HOMA-IR scores to help you assess your risk for prediabetes, type 2 diabetes, and metabolic syndrome.</p>
+            
+            <section class="mb-6">
+                <h3 class="font-medium text-gray-700 mb-2">How HOMA-IR is Calculated:</h3>
+                <p class="text-gray-600 mb-4">The HOMA-IR formula is: (Fasting Glucose [mg/dL] × Fasting Insulin [μU/mL]) ÷ 405</p>
+                <p class="text-gray-600">This equation estimates how well your body uses insulin to control blood glucose levels. Higher scores indicate greater insulin resistance.</p>
+            </section>
+            
+            <section class="mb-6">
+                <h3 class="font-medium text-gray-700 mb-2">HOMA-IR Score Interpretation:</h3>
+                <ul class="space-y-2 text-gray-600">
+                    <li>• <span class="font-medium">Normal insulin sensitivity:</span> &lt; 1.0 - Indicates healthy insulin function</li>
+                    <li>• <span class="font-medium">Mild Insulin Resistance:</span> 1.0 - 1.9 - Early warning of metabolic issues</li>
+                    <li>• <span class="font-medium">Significant Insulin Resistance:</span> 2.0 - 2.9 - Increased diabetes risk</li>
+                    <li>• <span class="font-medium">Severe Insulin Resistance:</span> ≥ 3.0 - High risk for metabolic disorders</li>
+                </ul>
+            </section>
+            
+            <section class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-2">Clinical Importance of HOMA-IR:</h3>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li>• Recognized by the World Health Organization for insulin resistance assessment</li>
+                    <li>• Used in hundreds of clinical studies worldwide</li>
+                    <li>• Helps predict development of type 2 diabetes years before onset</li>
+                    <li>• Correlates with cardiovascular disease risk factors</li>
+                </ul>
+            </section>
+
+            <section class="mt-6">
+                <h3 class="font-medium text-gray-700 mb-2">When to Test Your HOMA-IR?</h3>
+                <p class="text-gray-600 mb-2">Consider calculating your HOMA-IR if you have:</p>
+                <ul class="space-y-1 text-gray-600 mb-4">
+                    <li>• Family history of diabetes</li>
+                    <li>• Elevated blood sugar levels</li>
+                    <li>• PCOS (Polycystic Ovary Syndrome)</li>
+                    <li>• Signs of metabolic syndrome</li>
+                    <li>• Unexplained weight gain</li>
+                </ul>
+                <p class="text-gray-600">For best results, test after an 8-12 hour fast and repeat periodically to track changes.</p>
+            </section>
+        </article>
+    </div>
+</div>
+
+<script>
+    function homaIrCalculator() {
+        return {
+            fastingGlucose: null,
+            fastingInsulin: null,
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                if (!this.fastingGlucose || !this.fastingInsulin) {
+                    this.error = 'Please enter both glucose and insulin values';
+                    return;
+                }
+                
+                if (this.fastingGlucose <= 0 || this.fastingInsulin <= 0) {
+                    this.error = 'Values must be greater than zero';
+                    return;
+                }
+                
+                // Calculate HOMA-IR
+                const homaIr = (this.fastingGlucose * this.fastingInsulin) / 405;
+                
+                // Determine interpretation
+                let interpretation = '';
+                if (homaIr < 1.0) {
+                    interpretation = 'Normal insulin sensitivity';
+                } else if (homaIr >= 1.0 && homaIr < 2.0) {
+                    interpretation = 'Mild insulin resistance';
+                } else if (homaIr >= 2.0 && homaIr < 3.0) {
+                    interpretation = 'Significant insulin resistance';
+                } else {
+                    interpretation = 'Severe insulin resistance';
+                }
+                
+                this.result = {
+                    score: homaIr.toFixed(2),
+                    interpretation: interpretation
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

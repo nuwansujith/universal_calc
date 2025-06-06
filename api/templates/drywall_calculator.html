@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Drywall Calculator - Estimate Sheets Needed for Your Project | [Your Site Name]{% endblock %}
+
+{% block meta_description %}Free online drywall calculator. Quickly estimate how many drywall sheets you need for walls and ceilings based on room dimensions, sheet size, and waste factor. Perfect for DIYers and contractors.{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <article>
+        <h1 class="text-3xl font-bold text-center mb-8">Drywall Sheet Calculator</h1>
+        
+        <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
+            <form id="drywallForm" class="space-y-6">
+                <div>
+                    <label for="length" class="block text-sm font-medium text-gray-700">Room Length (ft)</label>
+                    <input type="number" step="0.01" id="length" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border" 
+                           aria-label="Enter room length in feet">
+                </div>
+                
+                <div>
+                    <label for="width" class="block text-sm font-medium text-gray-700">Room Width (ft)</label>
+                    <input type="number" step="0.01" id="width" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                           aria-label="Enter room width in feet">
+                </div>
+                
+                <div>
+                    <label for="height" class="block text-sm font-medium text-gray-700">Ceiling Height (ft)</label>
+                    <input type="number" step="0.01" id="height" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                           aria-label="Enter ceiling height in feet">
+                </div>
+                
+                <div>
+                    <label for="sheetsize" class="block text-sm font-medium text-gray-700">Drywall Sheet Size</label>
+                    <select id="sheetsize" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                            aria-label="Select drywall sheet size">
+                        <option value="32">4x8 ft (32 sq ft)</option>
+                        <option value="48">4x12 ft (48 sq ft)</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="waste" class="block text-sm font-medium text-gray-700">Waste Factor (%)</label>
+                    <input type="number" id="waste" value="10" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                           aria-label="Enter waste percentage (default 10%)">
+                </div>
+                
+                <button type="button" onclick="calculateDrywall()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        aria-label="Calculate drywall sheets needed">
+                    Calculate Drywall Sheets
+                </button>
+            </form>
+            
+            <section id="results" class="mt-6 hidden" aria-live="polite">
+                <h2 class="text-xl font-semibold mb-2">Drywall Estimation Results</h2>
+                <div class="space-y-2">
+                    <p>Total Wall Area: <span id="totalArea" class="font-bold">0</span> sq ft</p>
+                    <p>Number of Sheets Needed: <span id="sheetsNeeded" class="font-bold">0</span></p>
+                    <p>Including Waste: <span id="totalWithWaste" class="font-bold">0</span> sheets</p>
+                </div>
+            </section>
+        </div>
+        
+        <section class="mt-8 max-w-3xl mx-auto bg-gray-100 p-6 rounded-lg">
+            <h2 class="text-xl font-semibold mb-4">How to Use This Drywall Calculator</h2>
+            <ol class="space-y-2 list-decimal list-inside">
+                <li>Enter the dimensions of your room in feet (length, width, and ceiling height).</li>
+                <li>Select the size of drywall sheets you'll be using (standard 4x8 ft or larger 4x12 ft).</li>
+                <li>Adjust the waste factor percentage (we recommend 10-15% for most projects).</li>
+                <li>Click "Calculate" to see how many drywall sheets you need including waste.</li>
+            </ol>
+            
+            <h3 class="text-lg font-semibold mt-6 mb-2">Drywall Calculation Tips</h3>
+            <ul class="space-y-2 list-disc list-inside">
+                <li>Standard drywall sheets are 4 feet wide and come in 8, 10, or 12 foot lengths</li>
+                <li>For ceilings, calculate separately if using different sheet sizes</li>
+                <li>Add 10-15% extra for cutting waste and mistakes</li>
+                <li>Consider buying 1-2 extra sheets for future repairs</li>
+            </ul>
+        </section>
+        
+        <section class="mt-8 max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-sm">
+            <h2 class="text-xl font-semibold mb-4">Frequently Asked Questions</h2>
+            <div class="space-y-4">
+                <div>
+                    <h3 class="font-medium text-gray-800">How much drywall do I need for a 12x12 room?</h3>
+                    <p class="text-gray-600 mt-1">For a 12x12 room with 8 ft ceilings, you'll need approximately 12-14 sheets of 4x8 drywall including waste. Use our calculator above for precise measurements.</p>
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-800">What's the standard drywall sheet size?</h3>
+                    <p class="text-gray-600 mt-1">The most common size is 4x8 feet (32 sq ft), but 4x12 ft sheets (48 sq ft) are also available for larger projects with fewer seams.</p>
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-800">How do I account for doors and windows?</h3>
+                    <p class="text-gray-600 mt-1">Our calculator provides a total estimate. For precise calculations, subtract the area of doors and windows from your total wall area.</p>
+                </div>
+            </div>
+        </section>
+    </article>
+</div>
+
+<script>
+function calculateDrywall() {
+    // Get input values
+    const length = parseFloat(document.getElementById('length').value);
+    const width = parseFloat(document.getElementById('width').value);
+    const height = parseFloat(document.getElementById('height').value);
+    const sheetSize = parseFloat(document.getElementById('sheetsize').value);
+    const waste = parseFloat(document.getElementById('waste').value) / 100;
+    
+    // Calculate total wall area (2 walls for length, 2 for width)
+    const totalArea = 2 * (length * height) + 2 * (width * height);
+    
+    // Calculate sheets needed
+    let sheetsNeeded = totalArea / sheetSize;
+    sheetsNeeded = Math.ceil(sheetsNeeded); // Round up
+    
+    // Calculate with waste
+    const totalWithWaste = Math.ceil(sheetsNeeded * (1 + waste));
+    
+    // Display results
+    document.getElementById('totalArea').textContent = totalArea.toFixed(2);
+    document.getElementById('sheetsNeeded').textContent = sheetsNeeded;
+    document.getElementById('totalWithWaste').textContent = totalWithWaste;
+    
+    // Show results
+    document.getElementById('results').classList.remove('hidden');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Waist-to-Hip Ratio Calculator - Measure Your Health Risk | [Your Site Name]{% endblock %}
+
+{% block meta_description %}Calculate your waist-to-hip ratio (WHR) to assess health risks. Free, accurate WHR calculator for men and women with detailed health risk interpretation.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+        <h1 class="text-2xl font-bold text-dark mb-6">Waist-to-Hip Ratio Calculator</h1>
+        
+        <div class="prose prose-sm mb-6 text-gray-600">
+            <p>Use this free waist-to-hip ratio calculator to determine your WHR and understand your risk for obesity-related health conditions like heart disease, diabetes, and metabolic syndrome. Accurate for both men and women.</p>
+        </div>
+        
+        <div x-data="whrCalculator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                    <select x-model="gender" id="gender" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="units" class="block text-sm font-medium text-gray-700 mb-1">Units</label>
+                    <select x-model="units" id="units" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="inches">Inches</option>
+                        <option value="cm">Centimeters</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="waist" class="block text-sm font-medium text-gray-700 mb-1">Waist Circumference</label>
+                    <input x-model="waist" type="number" id="waist" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
+                </div>
+                <div>
+                    <label for="hip" class="block text-sm font-medium text-gray-700 mb-1">Hip Circumference</label>
+                    <input x-model="hip" type="number" id="hip" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
+                </div>
+            </div>
+
+            <button @click="calculate()" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                Calculate My Waist-to-Hip Ratio
+            </button>
+
+            <div x-show="result !== null" x-transition class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-green-800">Results</h3>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Waist-to-Hip Ratio: <span class="font-bold" x-text="result.ratio.toFixed(2)"></span></p>
+                            <p>Health Risk Category: <span class="font-bold" x-text="result.category"></span></p>
+                            <p class="text-sm" x-text="result.interpretation"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="error" x-transition class="bg-red-50 border border-red-200 rounded-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-800">Error</h3>
+                        <div class="mt-1 text-red-700">
+                            <p x-text="error"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <article>
+            <h2 class="text-xl font-semibold text-dark mb-4">Understanding Waist-to-Hip Ratio (WHR)</h2>
+            <div class="prose prose-sm text-gray-600 mb-4">
+                <p>The waist-to-hip ratio (WHR) is an important health indicator that compares your waist circumference to your hip circumference. Medical research shows WHR is a better predictor of cardiovascular health risks than BMI alone, as it measures abdominal fat distribution.</p>
+            </div>
+            
+            <section>
+                <h3 class="font-semibold text-gray-800 mb-2">Health Risk Categories by WHR:</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h4 class="font-medium text-gray-700">For Men:</h4>
+                        <ul class="list-disc list-inside space-y-1 text-gray-600 text-sm">
+                            <li><strong>Low risk (≤ 0.95):</strong> Healthy fat distribution</li>
+                            <li><strong>Moderate risk (0.96-1.0):</strong> Increased health risks</li>
+                            <li><strong>High risk (≥ 1.0):</strong> Significant risk for heart disease, diabetes</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-700">For Women:</h4>
+                        <ul class="list-disc list-inside space-y-1 text-gray-600 text-sm">
+                            <li><strong>Low risk (≤ 0.80):</strong> Healthy fat distribution</li>
+                            <li><strong>Moderate risk (0.81-0.85):</strong> Increased health risks</li>
+                            <li><strong>High risk (≥ 0.86):</strong> Significant risk for heart disease, diabetes</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="mt-6">
+                <h3 class="font-semibold text-gray-800 mb-2">How to Measure Accurately:</h3>
+                <ul class="list-disc list-inside space-y-2 text-gray-600">
+                    <li><strong>Waist measurement:</strong> Find the narrowest point between your ribs and hips, typically just above the belly button. Exhale normally and measure.</li>
+                    <li><strong>Hip measurement:</strong> Locate the widest part of your buttocks with your feet together. Measure at this point.</li>
+                    <li>Use a flexible, non-stretch tape measure kept parallel to the floor</li>
+                    <li>Take measurements while standing straight, without sucking in your stomach</li>
+                    <li>Repeat 2-3 times for accuracy and use the average</li>
+                </ul>
+            </section>
+
+            <section class="mt-6">
+                <h3 class="font-semibold text-gray-800 mb-2">Why WHR Matters for Your Health</h3>
+                <div class="prose prose-sm text-gray-600">
+                    <p>A high waist-to-hip ratio indicates abdominal obesity, which is associated with:</p>
+                    <ul class="list-disc list-inside">
+                        <li>Increased risk of cardiovascular disease</li>
+                        <li>Higher likelihood of developing type 2 diabetes</li>
+                        <li>Greater chance of metabolic syndrome</li>
+                        <li>Increased inflammation in the body</li>
+                        <li>Higher mortality risk from all causes</li>
+                    </ul>
+                    <p class="mt-2">Research shows that for every 0.1 increase in WHR, the risk of heart attack increases by 25% in women and 15% in men.</p>
+                </div>
+            </section>
+
+            <section class="mt-6">
+                <h3 class="font-semibold text-gray-800 mb-2">Improving Your Waist-to-Hip Ratio</h3>
+                <div class="prose prose-sm text-gray-600">
+                    <p>To achieve a healthier WHR:</p>
+                    <ul class="list-disc list-inside">
+                        <li>Engage in regular aerobic exercise (150+ minutes weekly)</li>
+                        <li>Incorporate strength training 2-3 times per week</li>
+                        <li>Follow a balanced diet rich in whole foods</li>
+                        <li>Reduce intake of processed foods and added sugars</li>
+                        <li>Manage stress through meditation or yoga</li>
+                        <li>Get adequate sleep (7-9 hours nightly)</li>
+                    </ul>
+                </div>
+            </section>
+        </article>
+    </div>
+</div>
+
+<script>
+    function whrCalculator() {
+        return {
+            gender: 'male',
+            units: 'inches',
+            waist: null,
+            hip: null,
+            result: null,
+            error: null,
+            
+            calculate() {
+                this.error = null;
+                this.result = null;
+                
+                if (!this.waist || !this.hip) {
+                    this.error = 'Please enter both waist and hip measurements';
+                    return;
+                }
+                
+                if (this.waist <= 0 || this.hip <= 0) {
+                    this.error = 'Measurements must be greater than zero';
+                    return;
+                }
+                
+                if (this.waist >= this.hip) {
+                    this.error = 'Waist measurement should be smaller than hip measurement';
+                    return;
+                }
+                
+                const ratio = this.waist / this.hip;
+                let category = '';
+                let interpretation = '';
+                
+                if (this.gender === 'male') {
+                    if (ratio <= 0.95) {
+                        category = 'Low Risk';
+                        interpretation = 'You have a low risk of obesity-related health conditions.';
+                    } else if (ratio <= 1.0) {
+                        category = 'Moderate Risk';
+                        interpretation = 'You have a moderate risk of obesity-related health conditions. Consider lifestyle changes.';
+                    } else {
+                        category = 'High Risk';
+                        interpretation = 'You have a high risk of obesity-related health conditions. Consult with a healthcare provider.';
+                    }
+                } else {
+                    if (ratio <= 0.80) {
+                        category = 'Low Risk';
+                        interpretation = 'You have a low risk of obesity-related health conditions.';
+                    } else if (ratio <= 0.85) {
+                        category = 'Moderate Risk';
+                        interpretation = 'You have a moderate risk of obesity-related health conditions. Consider lifestyle changes.';
+                    } else {
+                        category = 'High Risk';
+                        interpretation = 'You have a high risk of obesity-related health conditions. Consult with a healthcare provider.';
+                    }
+                }
+                
+                this.result = {
+                    ratio: ratio,
+                    category: category,
+                    interpretation: interpretation
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}
