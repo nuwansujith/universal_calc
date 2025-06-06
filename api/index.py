@@ -384,11 +384,11 @@ def sitemap():
 
 @app.route('/sitemap.xml')
 def serve_sitemap():
-    return send_from_directory(app.static_folder, 'sitemap.xml')
+    return render_template('sitemap.xml')
 
 @app.route('/robots.txt')
 def serve_robots():
-    return send_from_directory(app.static_folder, 'robots.txt')
+    return render_template('robots.txt')
 
 @app.route('/')
 def home():
