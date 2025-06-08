@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /private/
 
-Sitemap: https://www.OmniCalc.xyz/sitemap.xml
+Sitemap: https://www.omnicalc.xyz/sitemap.xml
