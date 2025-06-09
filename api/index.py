@@ -371,7 +371,7 @@ def discriminant_calculator():
                          description='Calculate the discriminant of quadratic equations to determine the nature of roots with our free tool.')
 
 @app.route('/Cubic-Yard-Calculator')
-def board_foot():
+def Cubic_Yard_Calculator():
     return render_template('Cubic_Yard_Calculator.html')
 
 @app.route('/privacy-policy')
