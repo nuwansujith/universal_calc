@@ -392,7 +392,9 @@ def serve_robots():
 
 @app.route('/cubic-yard-calculator')
 def cubic_yard_calculator():
-    return render_template('cubic_yard_calculator.html')
+    return render_template('cubic_yard_calculator.html', 
+                         title='Cubic Yard Calculator - Material Volume Estimation',
+                         description='Calculate cubic yards for landscaping or construction materials with our free online cubic yard calculator.')
 
 if __name__ == '__main__':
     app.run(debug=True)
