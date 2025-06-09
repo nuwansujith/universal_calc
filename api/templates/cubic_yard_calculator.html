@@ -7,25 +7,52 @@
     <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
         <h2 class="text-2xl font-bold text-dark mb-6">Cubic Yard Calculator</h2>
         
-        <div x-data="calculator()" class="space-y-6">
+        <div x-data="cubicYardCalculator()" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label for="length" class="block text-sm font-medium text-gray-700 mb-1">Length (ft)</label>
-                    <input x-model="length" type="number" id="length" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
+                    <label for="length" class="block text-sm font-medium text-gray-700 mb-1">Length</label>
+                    <div class="relative">
+                        <input x-model="length" type="number" id="length" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <span class="text-gray-500" x-text="units.length"></span>
+                        </div>
+                    </div>
                 </div>
                 <div>
-                    <label for="width" class="block text-sm font-medium text-gray-700 mb-1">Width (ft)</label>
-                    <input x-model="width" type="number" id="width" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
-                </div>
-                <div class="flex flex-col">
-                    <label for="depth" class="block text-sm font-medium text-gray-700 mb-1">Depth</label>
-                    <div class="flex">
-                        <input x-model="depth" type="number" id="depth" class="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:ring-primary focus:border-primary" placeholder="0.00">
-                        <select x-model="unit" class="border border-l-0 border-gray-300 rounded-r-md bg-gray-50 px-2 focus:ring-primary focus:border-primary">
-                            <option value="feet">ft</option>
-                            <option value="inches">in</option>
-                        </select>
+                    <label for="width" class="block text-sm font-medium text-gray-700 mb-1">Width</label>
+                    <div class="relative">
+                        <input x-model="width" type="number" id="width" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <span class="text-gray-500" x-text="units.width"></span>
+                        </div>
                     </div>
+                </div>
+                <div>
+                    <label for="depth" class="block text-sm font-medium text-gray-700 mb-1">Depth/Height</label>
+                    <div class="relative">
+                        <input x-model="depth" type="number" id="depth" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" placeholder="0.00">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <span class="text-gray-500" x-text="units.depth"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="unitSystem" class="block text-sm font-medium text-gray-700 mb-1">Unit System</label>
+                    <select x-model="unitSystem" @change="changeUnits()" id="unitSystem" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="imperial">Imperial (feet, inches)</option>
+                        <option value="metric">Metric (meters, cm)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="shape" class="block text-sm font-medium text-gray-700 mb-1">Shape Type</label>
+                    <select x-model="shape" id="shape" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        <option value="rectangle">Rectangle/Square</option>
+                        <option value="circle">Circle</option>
+                        <option value="triangle">Triangle</option>
+                    </select>
                 </div>
             </div>
 
@@ -42,8 +69,11 @@
                     </div>
                     <div class="ml-3">
                         <h3 class="text-lg font-medium text-green-800">Result</h3>
-                        <div class="mt-1 text-green-700">
-                            <p>You need <span class="font-bold" x-text="result"></span> cubic yards of material.</p>
+                        <div class="mt-1 text-green-700 space-y-1">
+                            <p>Volume: <span class="font-bold" x-text="result.volume"></span> cubic yards</p>
+                            <p>Volume: <span class="font-bold" x-text="result.cubicFeet"></span> cubic feet</p>
+                            <p>Volume: <span class="font-bold" x-text="result.cubicMeters"></span> cubic meters</p>
+                            <p>Dimensions: <span class="font-bold" x-text="result.dimensions"></span></p>
                         </div>
                     </div>
                 </div>
@@ -69,63 +99,134 @@
 
     <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
         <h3 class="text-xl font-semibold text-dark mb-4">How to Calculate Cubic Yards</h3>
-        <p class="text-gray-600 mb-4">To calculate cubic yards, follow these steps:</p>
-        <ol class="list-decimal list-inside space-y-2 text-gray-600">
-            <li>Measure the length, width, and depth of the area in feet.</li>
-            <li>Multiply the three dimensions together (length × width × depth).</li>
-            <li>Divide the result by 27 to convert to cubic yards.</li>
-        </ol>
-        <p class="mt-4 text-gray-600">Formula: (Length (ft) × Width (ft) × Depth (ft)) ÷ 27 = Cubic Yards</p>
+        <p class="text-gray-600 mb-4">This calculator helps estimate the volume of material in cubic yards:</p>
+        
+        <div class="mb-6">
+            <h4 class="font-medium text-gray-700 mb-2">For Rectangular Areas:</h4>
+            <p class="text-gray-600 mb-2">Formula: (Length × Width × Depth) ÷ 27 = Cubic Yards</p>
+            <p class="text-sm text-gray-500">(Divide by 27 to convert cubic feet to cubic yards)</p>
+        </div>
+        
+        <div class="mb-6">
+            <h4 class="font-medium text-gray-700 mb-2">For Circular Areas:</h4>
+            <p class="text-gray-600 mb-2">Formula: (π × (Radius)² × Depth) ÷ 27 = Cubic Yards</p>
+            <p class="text-sm text-gray-500">(Radius = Diameter ÷ 2)</p>
+        </div>
+        
+        <div class="mb-6">
+            <h4 class="font-medium text-gray-700 mb-2">For Triangular Areas:</h4>
+            <p class="text-gray-600 mb-2">Formula: (0.5 × Base × Height × Depth) ÷ 27 = Cubic Yards</p>
+        </div>
+        
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h4 class="font-medium text-gray-700 mb-2">Common Applications:</h4>
+            <ul class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                <li>• Concrete projects</li>
+                <li>• Landscaping materials</li>
+                <li>• Excavation calculations</li>
+                <li>• Gravel or mulch estimates</li>
+                <li>• Soil removal</li>
+                <li>• Pool volume</li>
+            </ul>
+        </div>
     </div>
 </div>
 
 <script>
-    function calculator() {
+    function cubicYardCalculator() {
         return {
             length: null,
             width: null,
             depth: null,
-            unit: 'feet',
+            unitSystem: 'imperial',
+            shape: 'rectangle',
+            units: {
+                length: 'ft',
+                width: 'ft',
+                depth: 'in'
+            },
             result: null,
             error: null,
+            
+            changeUnits() {
+                if (this.unitSystem === 'imperial') {
+                    this.units = {
+                        length: 'ft',
+                        width: 'ft',
+                        depth: 'in'
+                    };
+                } else {
+                    this.units = {
+                        length: 'm',
+                        width: 'm',
+                        depth: 'cm'
+                    };
+                }
+            },
             
             calculate() {
                 this.error = null;
                 this.result = null;
                 
-                if (!this.length || !this.width || !this.depth) {
-                    this.error = 'Please fill in all fields';
+                // Validate inputs
+                if (!this.length || !this.depth) {
+                    this.error = 'Please fill in all required dimensions';
                     return;
                 }
                 
-                if (this.length <= 0 || this.width <= 0 || this.depth <= 0) {
-                    this.error = 'All values must be greater than zero';
+                if (this.shape !== 'circle' && !this.width) {
+                    this.error = 'Please fill in all required dimensions';
                     return;
                 }
                 
-                fetch('/calculate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        length: this.length,
-                        width: this.width,
-                        depth: this.depth,
-                        unit: this.unit
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        this.result = data.result;
-                    } else {
-                        this.error = data.error || 'An error occurred during calculation';
-                    }
-                })
-                .catch(error => {
-                    this.error = 'Network error. Please try again.';
-                });
+                if (this.length <= 0 || (this.width && this.width <= 0) || this.depth <= 0) {
+                    this.error = 'Dimensions must be greater than zero';
+                    return;
+                }
+                
+                // Convert all dimensions to feet
+                let lengthFt, widthFt, depthFt;
+                
+                if (this.unitSystem === 'imperial') {
+                    lengthFt = parseFloat(this.length);
+                    widthFt = this.width ? parseFloat(this.width) : 0;
+                    depthFt = parseFloat(this.depth) / 12; // inches to feet
+                } else {
+                    lengthFt = parseFloat(this.length) * 3.28084; // meters to feet
+                    widthFt = this.width ? parseFloat(this.width) * 3.28084 : 0;
+                    depthFt = parseFloat(this.depth) / 100 * 3.28084; // cm to feet
+                }
+                
+                // Calculate volume based on shape
+                let volumeCubicFeet;
+                let dimensionsText = '';
+                
+                switch(this.shape) {
+                    case 'rectangle':
+                        volumeCubicFeet = lengthFt * widthFt * depthFt;
+                        dimensionsText = `${lengthFt.toFixed(2)}ft × ${widthFt.toFixed(2)}ft × ${(depthFt*12).toFixed(2)}in`;
+                        break;
+                    case 'circle':
+                        const radiusFt = lengthFt / 2; // using length as diameter
+                        volumeCubicFeet = Math.PI * Math.pow(radiusFt, 2) * depthFt;
+                        dimensionsText = `Diameter: ${lengthFt.toFixed(2)}ft, Depth: ${(depthFt*12).toFixed(2)}in`;
+                        break;
+                    case 'triangle':
+                        volumeCubicFeet = 0.5 * lengthFt * widthFt * depthFt;
+                        dimensionsText = `Base: ${lengthFt.toFixed(2)}ft, Height: ${widthFt.toFixed(2)}ft, Depth: ${(depthFt*12).toFixed(2)}in`;
+                        break;
+                }
+                
+                // Convert to cubic yards
+                const volumeCubicYards = volumeCubicFeet / 27;
+                const volumeCubicMeters = volumeCubicFeet * 0.0283168;
+                
+                this.result = {
+                    volume: volumeCubicYards.toFixed(2),
+                    cubicFeet: volumeCubicFeet.toFixed(2),
+                    cubicMeters: volumeCubicMeters.toFixed(2),
+                    dimensions: dimensionsText
+                };
             }
         }
     }
