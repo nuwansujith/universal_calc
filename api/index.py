@@ -370,10 +370,6 @@ def discriminant_calculator():
                          title='Discriminant Calculator - Quadratic Equations',
                          description='Calculate the discriminant of quadratic equations to determine the nature of roots with our free tool.')
 
-@app.route('/cubic-yard-calculator')
-def cubic_yard_calculator():
-    return render_template('cubic_yard_calculator.html')
-
 @app.route('/privacy-policy')
 def privacy_policy():
     return render_template('privacy.html')
@@ -394,35 +390,9 @@ def serve_sitemap():
 def serve_robots():
     return render_template('robots.txt')
 
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-@app.route('/calculate', methods=['POST'])
-def calculate():
-    try:
-        data = request.get_json()
-        length = float(data['length'])
-        width = float(data['width'])
-        depth = float(data['depth'])
-        unit = data['unit']
-        
-        # Convert inches to feet if necessary
-        if unit == 'inches':
-            depth = depth / 12
-        
-        # Calculate cubic yards
-        cubic_yards = (length * width * depth) / 27
-        
-        return jsonify({
-            'success': True,
-            'result': round(cubic_yards, 2)
-        })
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        })
+@app.route('/cubic-yard-calculator')
+def cubic_yard_calculator():
+    return render_template('cubic_yard_calculator.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
