@@ -3,5 +3,5 @@ Disallow: /search
 Disallow: /category/
 Disallow: /tag/
 Allow: /
+
 Sitemap: https://www.omnicalc.xyz/sitemap.xml
-Sitemap: https://www.omnicalc.xyz/sitemap-pages.xml
