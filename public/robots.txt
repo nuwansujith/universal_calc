@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /search
+Disallow: /category/
+Disallow: /tag/
+Allow: /
+
+Sitemap: https://www.omnicalc.xyz/sitemap.xml
