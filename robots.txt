@@ -1,6 +1,7 @@
 User-agent: *
+Disallow: /search
+Disallow: /category/
+Disallow: /tag/
 Allow: /
-Disallow: /admin/
-Disallow: /private/
-
 Sitemap: https://www.omnicalc.xyz/sitemap.xml
+Sitemap: https://www.omnicalc.xyz/sitemap-pages.xml
