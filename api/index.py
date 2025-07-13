@@ -382,10 +382,6 @@ def terms_of_service():
 def sitemap():
     return render_template('sitemap.html')
 
-@app.route('/sitemap.xml')
-def serve_sitemap():
-    return render_template('sitemap.xml')
-
 @app.route('/robots.txt')
 def serve_robots():
     return render_template('robots.txt')
